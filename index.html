@@ -3,163 +3,684 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CruiseWatch prices</title>
+<title>CruiseWatch</title>
 <style>
-:root { --bg:#fbfbfa; --fg:#1d1d1b; --muted:#6b6b66; --line:#e4e3df; --card:#fff; --down:#1a7f4b; --up:#b4232c; --s1:#2f6fd6; --s2:#d9822b; --s3:#7a52c7; --s4:#1f9e8f; }
-@media (prefers-color-scheme: dark) { :root { --bg:#151514; --fg:#ecebe7; --muted:#9a9a93; --line:#2e2e2b; --card:#1d1d1b; --down:#4cc38a; --up:#f0717a; --s1:#6ea0f0; --s2:#f0a85c; --s3:#a98ae6; --s4:#4fc7b8; } }
+:root {
+  --bg:#f7f7f5; --card:#ffffff; --fg:#1c1c1a; --muted:#6a6a64; --faint:#9a9a93; --line:#e5e4df; --hover:#f1f1ee;
+  --down:#127a47; --down-bg:#e3f3ea; --up:#b42330; --up-bg:#fbe7e8; --accent:#2457c5;
+  --c-INTERIOR:#7a52c7; --c-OUTSIDE:#2f6fd6; --c-BALCONY:#d9782b; --c-DELUXE:#1f9e8f;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) { :root {
+  --bg:#141413; --card:#1c1c1a; --fg:#ecebe6; --muted:#a3a39b; --faint:#75756e; --line:#2f2f2c; --hover:#252523;
+  --down:#4cc38a; --down-bg:#183527; --up:#f0717a; --up-bg:#3d1c1f; --accent:#7aa5f5;
+  --c-INTERIOR:#a98ae6; --c-OUTSIDE:#6ea0f0; --c-BALCONY:#f0a35c; --c-DELUXE:#4fc7b8;
+  color-scheme: dark;
+} }
 * { box-sizing: border-box; }
-body { margin:0; background:var(--bg); color:var(--fg); font:15px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif; }
-main { max-width:1100px; margin:0 auto; padding:24px 16px 48px; }
-h1 { font-size:22px; margin:0 0 4px; }
-.sub { color:var(--muted); margin:0 0 20px; font-size:13px; }
-h2 { font-size:15px; margin:28px 0 8px; }
-.alerts { display:grid; gap:6px; margin:0; padding:0; list-style:none; }
-.alerts li { background:var(--card); border:1px solid var(--line); border-radius:8px; padding:8px 12px; font-size:14px; }
-.wrap { overflow-x:auto; border:1px solid var(--line); border-radius:10px; background:var(--card); }
-table { border-collapse:collapse; width:100%; min-width:720px; font-variant-numeric:tabular-nums; }
-th, td { text-align:left; padding:8px 10px; border-bottom:1px solid var(--line); white-space:nowrap; }
-th { font-size:12px; color:var(--muted); font-weight:600; cursor:pointer; user-select:none; position:sticky; top:0; background:var(--card); }
-th[data-sort]:hover { color:var(--fg); }
-tr.row { cursor:pointer; }
-tr.row:hover td { background:color-mix(in srgb, var(--fg) 4%, transparent); }
-td.num { text-align:right; }
-.price { font-weight:600; }
-.delta { font-size:12px; margin-left:4px; }
-.down { color:var(--down); } .up { color:var(--up); } .muted { color:var(--muted); }
-.low { font-size:11px; color:var(--down); border:1px solid currentColor; border-radius:4px; padding:0 4px; margin-left:4px; }
-td.name { white-space:normal; min-width:200px; color:var(--muted); font-size:13px; }
-tr.chart td { background:var(--bg); padding:12px 10px 16px; }
-.legend { display:flex; gap:14px; font-size:12px; color:var(--muted); margin-bottom:6px; flex-wrap:wrap; }
-.legend i { display:inline-block; width:10px; height:3px; border-radius:2px; margin-right:5px; vertical-align:middle; }
-svg text { fill:var(--muted); font-size:11px; }
-a { color:var(--s1); }
-.controls { display:flex; gap:10px; align-items:center; margin:0 0 8px; font-size:13px; color:var(--muted); flex-wrap:wrap; }
-select { font:inherit; background:var(--card); color:var(--fg); border:1px solid var(--line); border-radius:6px; padding:3px 6px; }
+body { margin:0; background:var(--bg); color:var(--fg); font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; -webkit-text-size-adjust:100%; }
+main { max-width:1120px; margin:0 auto; padding:20px 16px 64px; }
+h1 { font-size:22px; margin:0; letter-spacing:-.01em; }
+h2 { font-size:16px; margin:0; }
+.muted { color:var(--muted); } .faint { color:var(--faint); }
+.down { color:var(--down); } .up { color:var(--up); }
+a { color:var(--accent); }
+button, select, input { font:inherit; color:var(--fg); }
+button { background:var(--card); border:1px solid var(--line); border-radius:8px; padding:6px 12px; cursor:pointer; }
+button:hover { background:var(--hover); }
+button.primary { background:var(--accent); border-color:var(--accent); color:#fff; }
+button.link { border:none; background:none; color:var(--accent); padding:0; }
+select, input[type=date], input[type=number] { background:var(--card); border:1px solid var(--line); border-radius:8px; padding:5px 8px; }
+.card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:16px; margin-top:16px; }
+.card-head { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:12px; }
+
+header { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; flex-wrap:wrap; }
+#status { margin:4px 0 0; font-size:13px; }
+.chips { display:flex; gap:6px; flex-wrap:wrap; margin-top:10px; }
+.chip { background:var(--card); border:1px solid var(--line); border-radius:999px; padding:3px 10px; font-size:13px; }
+
+.filters { position:sticky; top:0; z-index:5; background:color-mix(in srgb, var(--bg) 92%, transparent); backdrop-filter:blur(6px);
+  display:flex; gap:10px 16px; flex-wrap:wrap; align-items:center; padding:10px 0; margin-top:12px; border-bottom:1px solid var(--line); font-size:13px; }
+.filters label { display:flex; gap:6px; align-items:center; color:var(--muted); }
+.cabin-toggle { display:inline-flex; align-items:center; gap:5px; border:1px solid var(--line); border-radius:999px; padding:3px 10px; cursor:pointer; background:var(--card); color:var(--fg); user-select:none; }
+.cabin-toggle input { display:none; }
+.cabin-toggle i { width:9px; height:9px; border-radius:50%; display:inline-block; }
+.cabin-toggle:not(.on) { opacity:.45; }
+
+.seg { display:inline-flex; border:1px solid var(--line); border-radius:8px; overflow:hidden; }
+.seg button { border:none; border-radius:0; padding:5px 10px; font-size:13px; }
+.seg button + button { border-left:1px solid var(--line); }
+.seg button.on { background:var(--fg); color:var(--bg); }
+
+.summary { font-size:14px; margin:0 0 10px; }
+.changes { list-style:none; margin:0; padding:0; display:grid; gap:6px; }
+.change { display:grid; grid-template-columns:96px 1fr auto 70px; gap:12px; align-items:center; padding:8px 10px; border:1px solid var(--line); border-radius:10px; cursor:pointer; }
+.change:hover { background:var(--hover); }
+.badge { font-weight:700; font-size:13px; border-radius:6px; padding:3px 6px; text-align:center; font-variant-numeric:tabular-nums; }
+.badge.down { background:var(--down-bg); } .badge.up { background:var(--up-bg); }
+.change .what { min-width:0; }
+.change .what b { display:block; font-size:14px; }
+.change .what span { font-size:12px; color:var(--muted); }
+.change .prices { font-variant-numeric:tabular-nums; white-space:nowrap; font-size:14px; }
+.change .prices s { color:var(--faint); margin-right:4px; }
+.tag-low { font-size:11px; color:var(--down); border:1px solid currentColor; border-radius:4px; padding:0 4px; margin-left:6px; white-space:nowrap; }
+
+.chart { position:relative; }
+.chart svg { display:block; overflow:visible; }
+.chart text { fill:var(--faint); font-size:11px; font-variant-numeric:tabular-nums; }
+.tip { position:absolute; pointer-events:none; background:var(--card); border:1px solid var(--line); border-radius:8px; padding:6px 9px; font-size:12px;
+  box-shadow:0 4px 16px rgba(0,0,0,.12); white-space:nowrap; z-index:3; display:none; }
+.tip b { display:block; margin-bottom:2px; }
+.tip i { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:5px; }
+.legend { display:flex; gap:14px; flex-wrap:wrap; font-size:12px; color:var(--muted); }
+.legend i { display:inline-block; width:12px; height:3px; border-radius:2px; margin-right:5px; vertical-align:middle; }
+
+.table-wrap { overflow-x:auto; margin:0 -16px; padding:0 16px; }
+table { border-collapse:collapse; width:100%; min-width:760px; font-variant-numeric:tabular-nums; }
+th, td { text-align:left; padding:9px 8px; border-bottom:1px solid var(--line); white-space:nowrap; vertical-align:middle; }
+th { font-size:12px; color:var(--muted); font-weight:600; }
+tbody tr { cursor:pointer; }
+tbody tr:hover td { background:var(--hover); }
+td.cab { min-width:150px; }
+.pnow { font-weight:650; }
+.delta { font-size:12px; margin-left:6px; }
+.spark { vertical-align:middle; margin-left:8px; }
+td.itin { white-space:normal; color:var(--muted); font-size:13px; min-width:180px; }
+
+dialog { border:none; border-radius:14px; padding:0; width:min(920px, calc(100vw - 24px)); max-height:calc(100vh - 24px); background:var(--card); color:var(--fg); box-shadow:0 20px 60px rgba(0,0,0,.3); }
+dialog::backdrop { background:rgba(0,0,0,.45); }
+.dlg-head { display:flex; justify-content:space-between; gap:12px; align-items:flex-start; padding:16px 18px 0; }
+.dlg-head h2 { font-size:18px; }
+.dlg-body { padding:12px 18px 18px; }
+.stats { display:grid; grid-template-columns:repeat(auto-fit, minmax(190px, 1fr)); gap:10px; margin:6px 0 14px; }
+.stat { border:1px solid var(--line); border-radius:10px; padding:10px 12px; }
+.stat h3 { margin:0 0 4px; font-size:13px; display:flex; align-items:center; gap:6px; }
+.stat h3 i { width:9px; height:9px; border-radius:50%; display:inline-block; }
+.stat .big { font-size:22px; font-weight:700; font-variant-numeric:tabular-nums; }
+.stat dl { display:grid; grid-template-columns:auto 1fr; gap:2px 10px; margin:6px 0 0; font-size:12px; color:var(--muted); }
+.stat dd { margin:0; text-align:right; color:var(--fg); font-variant-numeric:tabular-nums; }
+.log { width:100%; min-width:0; font-size:13px; }
+.log td, .log th { padding:6px 6px; }
+.log tbody tr { cursor:default; } .log tbody tr:hover td { background:none; }
+
+.editor-row { display:grid; grid-template-columns: minmax(180px, 1.4fr) repeat(3, minmax(110px, 1fr)) auto; gap:8px; align-items:end; padding:10px 0; border-bottom:1px solid var(--line); }
+.editor-row label, .thr label { display:flex; flex-direction:column; gap:4px; font-size:12px; color:var(--muted); }
+.editor-row .cabins { grid-column:1 / -1; display:flex; gap:6px; flex-wrap:wrap; align-items:center; font-size:12px; color:var(--muted); }
+.editor-row .cabins label.cabin-toggle { flex-direction:row; color:var(--fg); }
+.thr { display:flex; gap:12px; flex-wrap:wrap; margin:14px 0; }
+.steps { font-size:13px; color:var(--muted); padding-left:18px; }
+pre { background:var(--bg); border:1px solid var(--line); border-radius:8px; padding:10px; font-size:12px; overflow:auto; max-height:200px; }
+.err { color:var(--up); font-size:13px; }
+.empty { color:var(--muted); font-size:14px; padding:8px 0; }
+
+@media (max-width: 640px) {
+  .change { grid-template-columns:84px 1fr; }
+  .change .prices { grid-column:2; }
+  .change svg { display:none; }
+  .editor-row { grid-template-columns:1fr 1fr; }
+  .editor-row > label:first-child { grid-column:1 / -1; }
+}
 </style>
 </head>
 <body>
 <main>
-<h1>CruiseWatch</h1>
-<p class="sub" id="sub"></p>
-<section id="alerts-wrap" hidden><h2>Recent price drops</h2><ul class="alerts" id="alerts"></ul></section>
-<h2>All sailings</h2>
-<div class="controls"><label>Sort <select id="sort"><option value="date">Sail date</option><option value="drop">Biggest drop since first seen</option><option value="price">Lowest price</option></select></label><span>Click a row for its price history. Prices are per person for 2 guests, taxes and fees included.</span></div>
-<div class="wrap"><table><thead id="head"></thead><tbody id="body"></tbody></table></div>
+  <header>
+    <div>
+      <h1>CruiseWatch</h1>
+      <p id="status" class="muted"></p>
+      <div class="chips" id="tracking"></div>
+    </div>
+    <button id="edit-btn">Change what's tracked</button>
+  </header>
+
+  <div class="filters" id="filters"></div>
+
+  <section class="card">
+    <div class="card-head">
+      <h2>What changed</h2>
+      <div class="seg" id="window"></div>
+    </div>
+    <p class="summary" id="changes-summary"></p>
+    <ul class="changes" id="changes"></ul>
+    <button class="link" id="changes-more" hidden></button>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <h2>Price now, by sail date</h2>
+      <div class="legend" id="overview-legend"></div>
+    </div>
+    <div class="chart" id="overview"></div>
+    <p class="faint" style="font-size:12px;margin:6px 0 0">Lowest price per person for 2 guests, taxes included. Hover to compare, click a sailing for its history.</p>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <h2>All sailings <span class="muted" id="count" style="font-weight:400"></span></h2>
+      <label class="muted" style="font-size:13px">Sort
+        <select id="sort">
+          <option value="date">Sail date</option>
+          <option value="drop">Biggest drop since first seen</option>
+          <option value="price">Lowest price now</option>
+        </select>
+      </label>
+    </div>
+    <div class="table-wrap"><table><thead id="thead"></thead><tbody id="tbody"></tbody></table></div>
+  </section>
 </main>
-<script id="data" type="application/json">{"generatedAt":"2026-11-24T13:08:21.079Z","runs":["2026-11-24T01:04:55.605Z","2026-11-24T04:23:15.258Z","2026-11-24T13:08:16.868Z"],"sailings":[{"id":"IC07W698_2026-11-28","ship":"Icon of the Seas","date":"2026-11-28","nights":7,"port":"Miami","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07MIA-1694717396&sailDate=2026-11-28&shipCode=IC&packageCode=IC07W698&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,null]],"BALCONY":[[0,1474.89],[1,1204.89],[2,1474.89]]}},{"id":"IC07E484_2026-12-05","ship":"Icon of the Seas","date":"2026-12-05","nights":7,"port":"Miami","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07MIA-2623281014&sailDate=2026-12-05&shipCode=IC&packageCode=IC07E484&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,null]],"BALCONY":[[0,1626.43],[2,2386.43]]}},{"id":"IC07W698_2026-12-12","ship":"Icon of the Seas","date":"2026-12-12","nights":7,"port":"Miami","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07MIA-1694717396&sailDate=2026-12-12&shipCode=IC&packageCode=IC07W698&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,null]],"BALCONY":[[0,null],[1,2205.39]]}},{"id":"IC07E485_2026-12-19","ship":"Icon of the Seas","date":"2026-12-19","nights":7,"port":"Miami","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07MIA-2623281014&sailDate=2026-12-19&shipCode=IC&packageCode=IC07E485&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,2824.21],[2,2694.21]],"BALCONY":[[0,1809.21]]}},{"id":"IC07W699_2026-12-26","ship":"Icon of the Seas","date":"2026-12-26","nights":7,"port":"Miami","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07MIA-1694717396&sailDate=2026-12-26&shipCode=IC&packageCode=IC07W699&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,4431.79]],"BALCONY":[[0,2849.29]]}},{"id":"IC07E484_2027-01-02","ship":"Icon of the Seas","date":"2027-01-02","nights":7,"port":"Miami","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07MIA-2623281014&sailDate=2027-01-02&shipCode=IC&packageCode=IC07E484&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1788.93]],"BALCONY":[[0,1803.93]]}},{"id":"IC07W698_2027-01-09","ship":"Icon of the Seas","date":"2027-01-09","nights":7,"port":"Miami","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07MIA-1694717396&sailDate=2027-01-09&shipCode=IC&packageCode=IC07W698&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,null]],"BALCONY":[[0,null],[1,2242.47],[2,2312.47]]}},{"id":"IC07E484_2027-01-16","ship":"Icon of the Seas","date":"2027-01-16","nights":7,"port":"Miami","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07MIA-2623281014&sailDate=2027-01-16&shipCode=IC&packageCode=IC07E484&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1763.93]],"BALCONY":[[0,1675.93]]}},{"id":"IC07W698_2027-01-23","ship":"Icon of the Seas","date":"2027-01-23","nights":7,"port":"Miami","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07MIA-1694717396&sailDate=2027-01-23&shipCode=IC&packageCode=IC07W698&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,null]],"BALCONY":[[0,null],[1,2102.47],[2,null]]}},{"id":"IC07E484_2027-01-30","ship":"Icon of the Seas","date":"2027-01-30","nights":7,"port":"Miami","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07MIA-2623281014&sailDate=2027-01-30&shipCode=IC&packageCode=IC07E484&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,2503.93],[2,2053.43]],"BALCONY":[[0,1745.93],[1,1985.93],[2,1745.93]]}},{"id":"IC07W698_2027-02-06","ship":"Icon of the Seas","date":"2027-02-06","nights":7,"port":"Miami","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07MIA-1694717396&sailDate=2027-02-06&shipCode=IC&packageCode=IC07W698&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,2088.03]],"BALCONY":[[0,2031.03]]}},{"id":"IC07E484_2027-02-13","ship":"Icon of the Seas","date":"2027-02-13","nights":7,"port":"Miami","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07MIA-2623281014&sailDate=2027-02-13&shipCode=IC&packageCode=IC07E484&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1833.93]],"BALCONY":[[0,1906.43]]}},{"id":"IC07W698_2027-02-20","ship":"Icon of the Seas","date":"2027-02-20","nights":7,"port":"Miami","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07MIA-1694717396&sailDate=2027-02-20&shipCode=IC&packageCode=IC07W698&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1578.53]],"BALCONY":[[0,1591.03]]}},{"id":"IC07E484_2027-02-27","ship":"Icon of the Seas","date":"2027-02-27","nights":7,"port":"Miami","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07MIA-2623281014&sailDate=2027-02-27&shipCode=IC&packageCode=IC07E484&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1803.93]],"BALCONY":[[0,1815.93]]}},{"id":"IC07W698_2027-03-06","ship":"Icon of the Seas","date":"2027-03-06","nights":7,"port":"Miami","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07MIA-1694717396&sailDate=2027-03-06&shipCode=IC&packageCode=IC07W698&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,2188.32]],"BALCONY":[[0,2103.32]]}},{"id":"IC07E484_2027-03-13","ship":"Icon of the Seas","date":"2027-03-13","nights":7,"port":"Miami","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07MIA-2623281014&sailDate=2027-03-13&shipCode=IC&packageCode=IC07E484&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1683.93]],"BALCONY":[[0,2046.43]]}},{"id":"IC07W698_2027-03-20","ship":"Icon of the Seas","date":"2027-03-20","nights":7,"port":"Miami","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07MIA-1694717396&sailDate=2027-03-20&shipCode=IC&packageCode=IC07W698&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1958.82]],"BALCONY":[[0,1961.32]]}},{"id":"IC07E484_2027-03-27","ship":"Icon of the Seas","date":"2027-03-27","nights":7,"port":"Miami","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07MIA-2623281014&sailDate=2027-03-27&shipCode=IC&packageCode=IC07E484&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,2003.93]],"BALCONY":[[0,1985.93]]}},{"id":"IC07W698_2027-04-03","ship":"Icon of the Seas","date":"2027-04-03","nights":7,"port":"Miami","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07MIA-1694717396&sailDate=2027-04-03&shipCode=IC&packageCode=IC07W698&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1375.86]],"BALCONY":[[0,1538.86]]}},{"id":"IC07E484_2027-04-10","ship":"Icon of the Seas","date":"2027-04-10","nights":7,"port":"Miami","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07MIA-2623281014&sailDate=2027-04-10&shipCode=IC&packageCode=IC07E484&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1736.43],[2,1503.43]],"BALCONY":[[0,1646.43]]}},{"id":"IC07W698_2027-04-17","ship":"Icon of the Seas","date":"2027-04-17","nights":7,"port":"Miami","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07MIA-1694717396&sailDate=2027-04-17&shipCode=IC&packageCode=IC07W698&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1415.86]],"BALCONY":[[0,1588.36],[1,1750.86],[2,1588.36]]}},{"id":"IC07E484_2027-04-24","ship":"Icon of the Seas","date":"2027-04-24","nights":7,"port":"Miami","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07MIA-2623281014&sailDate=2027-04-24&shipCode=IC&packageCode=IC07E484&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1759.43]],"BALCONY":[[0,1595.93]]}},{"id":"IC07W790_2027-05-01","ship":"Icon of the Seas","date":"2027-05-01","nights":7,"port":"Miami","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07MIA-585762144&sailDate=2027-05-01&shipCode=IC&packageCode=IC07W790&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1768.76]],"BALCONY":[[0,2391.26],[1,2191.76]]}},{"id":"IC07E549_2027-05-08","ship":"Icon of the Seas","date":"2027-05-08","nights":7,"port":"Miami","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07MIA-2623281014&sailDate=2027-05-08&shipCode=IC&packageCode=IC07E549&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1589.87]],"BALCONY":[[0,2713.37],[1,2150.87]]}},{"id":"IC07E549_2027-05-15","ship":"Icon of the Seas","date":"2027-05-15","nights":7,"port":"Miami","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07MIA-2623281014&sailDate=2027-05-15&shipCode=IC&packageCode=IC07E549&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1561.37]],"BALCONY":[[0,1618.87]]}},{"id":"IC07W791_2027-05-22","ship":"Icon of the Seas","date":"2027-05-22","nights":7,"port":"Miami","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07MIA-1694717396&sailDate=2027-05-22&shipCode=IC&packageCode=IC07W791&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1749.81]],"BALCONY":[[0,1831.81]]}},{"id":"IC07E550_2027-05-29","ship":"Icon of the Seas","date":"2027-05-29","nights":7,"port":"Miami","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07MIA-2623281014&sailDate=2027-05-29&shipCode=IC&packageCode=IC07E550&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1812.8]],"BALCONY":[[0,2095.3]]}},{"id":"IC07E549_2027-06-05","ship":"Icon of the Seas","date":"2027-06-05","nights":7,"port":"Miami","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07MIA-2623281014&sailDate=2027-06-05&shipCode=IC&packageCode=IC07E549&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1960.37]],"BALCONY":[[0,1980.37]]}},{"id":"IC07W791_2027-06-12","ship":"Icon of the Seas","date":"2027-06-12","nights":7,"port":"Miami","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07MIA-1694717396&sailDate=2027-06-12&shipCode=IC&packageCode=IC07W791&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1932.31]],"BALCONY":[[0,2131.81]]}},{"id":"IC07E549_2027-06-19","ship":"Icon of the Seas","date":"2027-06-19","nights":7,"port":"Miami","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07MIA-2623281014&sailDate=2027-06-19&shipCode=IC&packageCode=IC07E549&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,2141.37]],"BALCONY":[[0,2233.37]]}},{"id":"IC07E549_2027-06-26","ship":"Icon of the Seas","date":"2027-06-26","nights":7,"port":"Miami","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07MIA-2623281014&sailDate=2027-06-26&shipCode=IC&packageCode=IC07E549&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,2291.37]],"BALCONY":[[0,2233.37]]}},{"id":"IC07W791_2027-07-03","ship":"Icon of the Seas","date":"2027-07-03","nights":7,"port":"Miami","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07MIA-1694717396&sailDate=2027-07-03&shipCode=IC&packageCode=IC07W791&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1994.46]],"BALCONY":[[0,2076.46]]}},{"id":"IC07E549_2027-07-10","ship":"Icon of the Seas","date":"2027-07-10","nights":7,"port":"Miami","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07MIA-2623281014&sailDate=2027-07-10&shipCode=IC&packageCode=IC07E549&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,2120.87]],"BALCONY":[[0,2273.87]]}},{"id":"IC07E549_2027-07-17","ship":"Icon of the Seas","date":"2027-07-17","nights":7,"port":"Miami","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07MIA-2623281014&sailDate=2027-07-17&shipCode=IC&packageCode=IC07E549&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,2090.87]],"BALCONY":[[0,2213.87]]}},{"id":"IC07W791_2027-07-24","ship":"Icon of the Seas","date":"2027-07-24","nights":7,"port":"Miami","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07MIA-1694717396&sailDate=2027-07-24&shipCode=IC&packageCode=IC07W791&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,2344.46]],"BALCONY":[[0,2396.46]]}},{"id":"IC07E549_2027-07-31","ship":"Icon of the Seas","date":"2027-07-31","nights":7,"port":"Miami","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07MIA-2623281014&sailDate=2027-07-31&shipCode=IC&packageCode=IC07E549&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,2031.37]],"BALCONY":[[0,2223.37]]}},{"id":"IC09R025_2027-08-07","ship":"Icon of the Seas","date":"2027-08-07","nights":9,"port":"Miami","name":"Perfect Day CocoCay to Texas Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC09MIA-2498268339&sailDate=2027-08-07&shipCode=IC&packageCode=IC09R025&destinationCode=ISLAN&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1883.83]],"BALCONY":[[0,2149.83]]}},{"id":"IC06W317_2027-08-16","ship":"Icon of the Seas","date":"2027-08-16","nights":6,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC06GAL-1251154778&sailDate=2027-08-16&shipCode=IC&packageCode=IC06W317&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1464.88]],"BALCONY":[[0,1549.88]]}},{"id":"IC06W318_2027-08-22","ship":"Icon of the Seas","date":"2027-08-22","nights":6,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC06GAL-1251154778&sailDate=2027-08-22&shipCode=IC&packageCode=IC06W318&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1346.96]],"BALCONY":[[0,1508.96]]}},{"id":"IC08W071_2027-08-28","ship":"Icon of the Seas","date":"2027-08-28","nights":8,"port":"Galveston","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC08GAL-3243125344&sailDate=2027-08-28&shipCode=IC&packageCode=IC08W071&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1778.93]],"BALCONY":[[0,1719.93]]}},{"id":"IC06W318_2027-09-05","ship":"Icon of the Seas","date":"2027-09-05","nights":6,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC06GAL-1251154778&sailDate=2027-09-05&shipCode=IC&packageCode=IC06W318&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1276.96]],"BALCONY":[[0,1239.46]]}},{"id":"IC08W071_2027-09-11","ship":"Icon of the Seas","date":"2027-09-11","nights":8,"port":"Galveston","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC08GAL-3243125344&sailDate=2027-09-11&shipCode=IC&packageCode=IC08W071&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1799.43]],"BALCONY":[[0,1799.93]]}},{"id":"IC06W318_2027-09-19","ship":"Icon of the Seas","date":"2027-09-19","nights":6,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC06GAL-1251154778&sailDate=2027-09-19&shipCode=IC&packageCode=IC06W318&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1199.46]],"BALCONY":[[0,1199.46]]}},{"id":"IC08W072_2027-09-25","ship":"Icon of the Seas","date":"2027-09-25","nights":8,"port":"Galveston","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC08GAL-3243125344&sailDate=2027-09-25&shipCode=IC&packageCode=IC08W072&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1678.96]],"BALCONY":[[0,1679.46]]}},{"id":"IC06W319_2027-10-03","ship":"Icon of the Seas","date":"2027-10-03","nights":6,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC06GAL-1251154778&sailDate=2027-10-03&shipCode=IC&packageCode=IC06W319&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1248.01]],"BALCONY":[[0,1320.51]]}},{"id":"IC08W072_2027-10-09","ship":"Icon of the Seas","date":"2027-10-09","nights":8,"port":"Galveston","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC08GAL-3243125344&sailDate=2027-10-09&shipCode=IC&packageCode=IC08W072&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,2049.46]],"BALCONY":[[0,1896.46]]}},{"id":"IC06W319_2027-10-17","ship":"Icon of the Seas","date":"2027-10-17","nights":6,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC06GAL-1251154778&sailDate=2027-10-17&shipCode=IC&packageCode=IC06W319&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1218.01]],"BALCONY":[[0,1239.51]]}},{"id":"IC08W072_2027-10-23","ship":"Icon of the Seas","date":"2027-10-23","nights":8,"port":"Galveston","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC08GAL-3243125344&sailDate=2027-10-23&shipCode=IC&packageCode=IC08W072&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1699.46]],"BALCONY":[[0,1699.96]]}},{"id":"IC06W319_2027-10-31","ship":"Icon of the Seas","date":"2027-10-31","nights":6,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC06GAL-1251154778&sailDate=2027-10-31&shipCode=IC&packageCode=IC06W319&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1328.51]],"BALCONY":[[0,1299.51]]}},{"id":"IC08W073_2027-11-06","ship":"Icon of the Seas","date":"2027-11-06","nights":8,"port":"Galveston","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC08GAL-3243125344&sailDate=2027-11-06&shipCode=IC&packageCode=IC08W073&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1829.64]],"BALCONY":[[0,1829.64]]}},{"id":"IC07W792_2027-11-14","ship":"Icon of the Seas","date":"2027-11-14","nights":7,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07GAL-3851841632&sailDate=2027-11-14&shipCode=IC&packageCode=IC07W792&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1349.81]],"BALCONY":[[0,1349.81]]}},{"id":"IC07W829_2027-11-21","ship":"Icon of the Seas","date":"2027-11-21","nights":7,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07GAL-3851841632&sailDate=2027-11-21&shipCode=IC&packageCode=IC07W829&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1956.2]],"BALCONY":[[0,2029.7]]}},{"id":"IC07W793_2027-11-28","ship":"Icon of the Seas","date":"2027-11-28","nights":7,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07GAL-3851841632&sailDate=2027-11-28&shipCode=IC&packageCode=IC07W793&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1349.7]],"BALCONY":[[0,1349.7]]}},{"id":"IC07W829_2027-12-05","ship":"Icon of the Seas","date":"2027-12-05","nights":7,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07GAL-3851841632&sailDate=2027-12-05&shipCode=IC&packageCode=IC07W829&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1386.7]],"BALCONY":[[0,1399.7]]}},{"id":"IC07W793_2027-12-12","ship":"Icon of the Seas","date":"2027-12-12","nights":7,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07GAL-3851841632&sailDate=2027-12-12&shipCode=IC&packageCode=IC07W793&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1349.7]],"BALCONY":[[0,1399.7]]}},{"id":"IC07W794_2027-12-19","ship":"Icon of the Seas","date":"2027-12-19","nights":7,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07GAL-3851841632&sailDate=2027-12-19&shipCode=IC&packageCode=IC07W794&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1899.2]],"BALCONY":[[0,1900.2]]}},{"id":"IC07W795_2027-12-26","ship":"Icon of the Seas","date":"2027-12-26","nights":7,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07GAL-3851841632&sailDate=2027-12-26&shipCode=IC&packageCode=IC07W795&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,2249.2]],"BALCONY":[[0,2250.2]]}},{"id":"IC07W793_2028-01-02","ship":"Icon of the Seas","date":"2028-01-02","nights":7,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07GAL-3851841632&sailDate=2028-01-02&shipCode=IC&packageCode=IC07W793&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1299.2]],"BALCONY":[[0,1300.2]]}},{"id":"IC07W793_2028-01-09","ship":"Icon of the Seas","date":"2028-01-09","nights":7,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07GAL-3851841632&sailDate=2028-01-09&shipCode=IC&packageCode=IC07W793&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1219.2]],"BALCONY":[[0,1219.7]]}},{"id":"IC07W829_2028-01-16","ship":"Icon of the Seas","date":"2028-01-16","nights":7,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07GAL-3851841632&sailDate=2028-01-16&shipCode=IC&packageCode=IC07W829&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1199.7]],"BALCONY":[[0,1200.2]]}},{"id":"IC07W793_2028-01-23","ship":"Icon of the Seas","date":"2028-01-23","nights":7,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07GAL-3851841632&sailDate=2028-01-23&shipCode=IC&packageCode=IC07W793&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1228.2]],"BALCONY":[[0,1229.2]]}},{"id":"IC07W793_2028-01-30","ship":"Icon of the Seas","date":"2028-01-30","nights":7,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07GAL-3851841632&sailDate=2028-01-30&shipCode=IC&packageCode=IC07W793&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1229.2]],"BALCONY":[[0,1230.2]]}},{"id":"IC07W793_2028-02-06","ship":"Icon of the Seas","date":"2028-02-06","nights":7,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07GAL-3851841632&sailDate=2028-02-06&shipCode=IC&packageCode=IC07W793&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1249.2]],"BALCONY":[[0,1249.7]]}},{"id":"IC07W829_2028-02-13","ship":"Icon of the Seas","date":"2028-02-13","nights":7,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07GAL-3851841632&sailDate=2028-02-13&shipCode=IC&packageCode=IC07W829&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,2071.2]],"BALCONY":[[0,1849.7]]}},{"id":"IC07W793_2028-02-20","ship":"Icon of the Seas","date":"2028-02-20","nights":7,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07GAL-3851841632&sailDate=2028-02-20&shipCode=IC&packageCode=IC07W793&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1399.2]],"BALCONY":[[0,1399.7]]}},{"id":"IC07W793_2028-02-27","ship":"Icon of the Seas","date":"2028-02-27","nights":7,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07GAL-3851841632&sailDate=2028-02-27&shipCode=IC&packageCode=IC07W793&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1299.2]],"BALCONY":[[0,1300.2]]}},{"id":"IC07W793_2028-03-05","ship":"Icon of the Seas","date":"2028-03-05","nights":7,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07GAL-3851841632&sailDate=2028-03-05&shipCode=IC&packageCode=IC07W793&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1279.7]],"BALCONY":[[0,1279.7]]}},{"id":"IC07W829_2028-03-12","ship":"Icon of the Seas","date":"2028-03-12","nights":7,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07GAL-3851841632&sailDate=2028-03-12&shipCode=IC&packageCode=IC07W829&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1449.7]],"BALCONY":[[0,1449.7]]}},{"id":"IC07W793_2028-03-19","ship":"Icon of the Seas","date":"2028-03-19","nights":7,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07GAL-3851841632&sailDate=2028-03-19&shipCode=IC&packageCode=IC07W793&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1350.2]],"BALCONY":[[0,1350.7]]}},{"id":"IC07W829_2028-03-26","ship":"Icon of the Seas","date":"2028-03-26","nights":7,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07GAL-3851841632&sailDate=2028-03-26&shipCode=IC&packageCode=IC07W829&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1319.2]],"BALCONY":[[0,1319.7]]}},{"id":"IC07W793_2028-04-02","ship":"Icon of the Seas","date":"2028-04-02","nights":7,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07GAL-3851841632&sailDate=2028-04-02&shipCode=IC&packageCode=IC07W793&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1279.7]],"BALCONY":[[0,1279.7]]}},{"id":"IC07W793_2028-04-09","ship":"Icon of the Seas","date":"2028-04-09","nights":7,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07GAL-3851841632&sailDate=2028-04-09&shipCode=IC&packageCode=IC07W793&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1249.2]],"BALCONY":[[0,1249.7]]}},{"id":"IC07W793_2028-04-16","ship":"Icon of the Seas","date":"2028-04-16","nights":7,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07GAL-3851841632&sailDate=2028-04-16&shipCode=IC&packageCode=IC07W793&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1279.7]],"BALCONY":[[0,1279.7]]}},{"id":"IC07W941_2028-04-23","ship":"Icon of the Seas","date":"2028-04-23","nights":7,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07GAL-3851841632&sailDate=2028-04-23&shipCode=IC&packageCode=IC07W941&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1298.38]],"BALCONY":[[0,1298.38]]}},{"id":"IC06W397_2028-04-30","ship":"Icon of the Seas","date":"2028-04-30","nights":6,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC06GAL-1251154778&sailDate=2028-04-30&shipCode=IC&packageCode=IC06W397&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1148.38]],"BALCONY":[[0,1148.88]]}},{"id":"IC08W115_2028-05-06","ship":"Icon of the Seas","date":"2028-05-06","nights":8,"port":"Galveston","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC08GAL-3243125344&sailDate=2028-05-06&shipCode=IC&packageCode=IC08W115&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1698.53]],"BALCONY":[[0,1698.53]]}},{"id":"IC06W397_2028-05-14","ship":"Icon of the Seas","date":"2028-05-14","nights":6,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC06GAL-1251154778&sailDate=2028-05-14&shipCode=IC&packageCode=IC06W397&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1197.88]],"BALCONY":[[0,1198.88]]}},{"id":"IC08W115_2028-05-20","ship":"Icon of the Seas","date":"2028-05-20","nights":8,"port":"Galveston","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC08GAL-3243125344&sailDate=2028-05-20&shipCode=IC&packageCode=IC08W115&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1798.53]],"BALCONY":[[0,1799.03]]}},{"id":"IC06W398_2028-05-28","ship":"Icon of the Seas","date":"2028-05-28","nights":6,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC06GAL-1251154778&sailDate=2028-05-28&shipCode=IC&packageCode=IC06W398&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1398.12]],"BALCONY":[[0,1398.62]]}},{"id":"IC08W115_2028-06-03","ship":"Icon of the Seas","date":"2028-06-03","nights":8,"port":"Galveston","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC08GAL-3243125344&sailDate=2028-06-03&shipCode=IC&packageCode=IC08W115&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1998.33]],"BALCONY":[[0,1998.83]]}},{"id":"IC06W397_2028-06-11","ship":"Icon of the Seas","date":"2028-06-11","nights":6,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC06GAL-1251154778&sailDate=2028-06-11&shipCode=IC&packageCode=IC06W397&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1447.88]],"BALCONY":[[0,1448.88]]}},{"id":"IC08W116_2028-06-17","ship":"Icon of the Seas","date":"2028-06-17","nights":8,"port":"Galveston","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC08GAL-3243125344&sailDate=2028-06-17&shipCode=IC&packageCode=IC08W116&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1998.35]],"BALCONY":[[0,1998.85]]}},{"id":"IC06W397_2028-06-25","ship":"Icon of the Seas","date":"2028-06-25","nights":6,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC06GAL-1251154778&sailDate=2028-06-25&shipCode=IC&packageCode=IC06W397&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1447.88]],"BALCONY":[[0,1448.88]]}},{"id":"IC08W115_2028-07-01","ship":"Icon of the Seas","date":"2028-07-01","nights":8,"port":"Galveston","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC08GAL-3243125344&sailDate=2028-07-01&shipCode=IC&packageCode=IC08W115&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,2098.83]],"BALCONY":[[0,2098.83]]}},{"id":"IC06W397_2028-07-09","ship":"Icon of the Seas","date":"2028-07-09","nights":6,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC06GAL-1251154778&sailDate=2028-07-09&shipCode=IC&packageCode=IC06W397&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1447.88]],"BALCONY":[[0,1448.88]]}},{"id":"IC08W115_2028-07-15","ship":"Icon of the Seas","date":"2028-07-15","nights":8,"port":"Galveston","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC08GAL-3243125344&sailDate=2028-07-15&shipCode=IC&packageCode=IC08W115&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1998.33]],"BALCONY":[[0,1998.83]]}},{"id":"IC06W397_2028-07-23","ship":"Icon of the Seas","date":"2028-07-23","nights":6,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC06GAL-1251154778&sailDate=2028-07-23&shipCode=IC&packageCode=IC06W397&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1447.88]],"BALCONY":[[0,1448.88]]}},{"id":"IC08W116_2028-07-29","ship":"Icon of the Seas","date":"2028-07-29","nights":8,"port":"Galveston","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC08GAL-3243125344&sailDate=2028-07-29&shipCode=IC&packageCode=IC08W116&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1998.35]],"BALCONY":[[0,1998.85]]}},{"id":"IC06W397_2028-08-06","ship":"Icon of the Seas","date":"2028-08-06","nights":6,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC06GAL-1251154778&sailDate=2028-08-06&shipCode=IC&packageCode=IC06W397&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1248.38]],"BALCONY":[[0,1248.88]]}},{"id":"IC08W115_2028-08-12","ship":"Icon of the Seas","date":"2028-08-12","nights":8,"port":"Galveston","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC08GAL-3243125344&sailDate=2028-08-12&shipCode=IC&packageCode=IC08W115&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1798.53]],"BALCONY":[[0,1799.03]]}},{"id":"IC06W397_2028-08-20","ship":"Icon of the Seas","date":"2028-08-20","nights":6,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC06GAL-1251154778&sailDate=2028-08-20&shipCode=IC&packageCode=IC06W397&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1197.88]],"BALCONY":[[0,1198.88]]}},{"id":"IC08W115_2028-08-26","ship":"Icon of the Seas","date":"2028-08-26","nights":8,"port":"Galveston","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC08GAL-3243125344&sailDate=2028-08-26&shipCode=IC&packageCode=IC08W115&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1698.53]],"BALCONY":[[0,1698.53]]}},{"id":"IC06W397_2028-09-03","ship":"Icon of the Seas","date":"2028-09-03","nights":6,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC06GAL-1251154778&sailDate=2028-09-03&shipCode=IC&packageCode=IC06W397&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1248.38]],"BALCONY":[[0,1248.88]]}},{"id":"IC08W116_2028-09-09","ship":"Icon of the Seas","date":"2028-09-09","nights":8,"port":"Galveston","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC08GAL-3243125344&sailDate=2028-09-09&shipCode=IC&packageCode=IC08W116&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1698.06]],"BALCONY":[[0,1699.06]]}},{"id":"IC06W397_2028-09-17","ship":"Icon of the Seas","date":"2028-09-17","nights":6,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC06GAL-1251154778&sailDate=2028-09-17&shipCode=IC&packageCode=IC06W397&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1148.38]],"BALCONY":[[0,1148.88]]}},{"id":"IC08W115_2028-09-23","ship":"Icon of the Seas","date":"2028-09-23","nights":8,"port":"Galveston","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC08GAL-3243125344&sailDate=2028-09-23&shipCode=IC&packageCode=IC08W115&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1698.53]],"BALCONY":[[0,1698.53]]}},{"id":"IC06W397_2028-10-01","ship":"Icon of the Seas","date":"2028-10-01","nights":6,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC06GAL-1251154778&sailDate=2028-10-01&shipCode=IC&packageCode=IC06W397&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1148.38]],"BALCONY":[[0,1148.88]]}},{"id":"IC08W115_2028-10-07","ship":"Icon of the Seas","date":"2028-10-07","nights":8,"port":"Galveston","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC08GAL-3243125344&sailDate=2028-10-07&shipCode=IC&packageCode=IC08W115&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1798.53]],"BALCONY":[[0,1799.03]]}},{"id":"IC07W942_2028-10-15","ship":"Icon of the Seas","date":"2028-10-15","nights":7,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07GAL-3851841632&sailDate=2028-10-15&shipCode=IC&packageCode=IC07W942&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1298.07]],"BALCONY":[[0,1299.07]]}}],"alerts":[{"at":"2026-11-24T13:08:18.990Z","id":"IC07E484_2027-04-10","cabin":"OUTSIDE","from":1736.43,"to":1503.43,"issue":5},{"at":"2026-11-24T13:08:18.990Z","id":"IC07E484_2027-01-30","cabin":"OUTSIDE","from":2503.93,"to":2053.43,"issue":5},{"at":"2026-11-24T04:23:17.613Z","id":"IC07W790_2027-05-01","cabin":"BALCONY","from":2391.26,"to":2191.76,"issue":4},{"at":"2026-11-24T04:23:17.613Z","id":"IC07W698_2026-11-28","cabin":"BALCONY","from":1474.89,"to":1204.89,"issue":4},{"at":"2026-11-24T04:23:17.613Z","id":"IC07E549_2027-05-08","cabin":"BALCONY","from":2713.37,"to":2150.87,"issue":4}],"cabinOrder":["INTERIOR","OUTSIDE","BALCONY","DELUXE"]}</script>
+
+<dialog id="detail"></dialog>
+<dialog id="editor"></dialog>
+
+<script id="data" type="application/json">{"generatedAt":"2026-11-24T16:28:16.840Z","runs":["2026-11-24T01:04:55.605Z","2026-11-24T04:23:15.258Z","2026-11-24T13:08:16.868Z","2026-11-24T16:28:13.260Z"],"sailings":[{"id":"IC07W698_2026-11-28","shipCode":"IC","ship":"Icon of the Seas","date":"2026-11-28","nights":7,"port":"Miami","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07MIA-1694717396&sailDate=2026-11-28&shipCode=IC&packageCode=IC07W698&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,null],[3,1562.89]],"BALCONY":[[0,1474.89],[1,1204.89],[2,1474.89]]}},{"id":"IC07E484_2026-12-05","shipCode":"IC","ship":"Icon of the Seas","date":"2026-12-05","nights":7,"port":"Miami","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07MIA-2623281014&sailDate=2026-12-05&shipCode=IC&packageCode=IC07E484&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,null]],"BALCONY":[[0,1626.43],[2,2386.43]]}},{"id":"IC07W698_2026-12-12","shipCode":"IC","ship":"Icon of the Seas","date":"2026-12-12","nights":7,"port":"Miami","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07MIA-1694717396&sailDate=2026-12-12&shipCode=IC&packageCode=IC07W698&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,null]],"BALCONY":[[0,null],[1,2205.39]]}},{"id":"IC07E485_2026-12-19","shipCode":"IC","ship":"Icon of the Seas","date":"2026-12-19","nights":7,"port":"Miami","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07MIA-2623281014&sailDate=2026-12-19&shipCode=IC&packageCode=IC07E485&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,2824.21],[2,2694.21]],"BALCONY":[[0,1809.21]]}},{"id":"IC07W699_2026-12-26","shipCode":"IC","ship":"Icon of the Seas","date":"2026-12-26","nights":7,"port":"Miami","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07MIA-1694717396&sailDate=2026-12-26&shipCode=IC&packageCode=IC07W699&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,4431.79]],"BALCONY":[[0,2849.29],[3,3009.29]]}},{"id":"IC07E484_2027-01-02","shipCode":"IC","ship":"Icon of the Seas","date":"2027-01-02","nights":7,"port":"Miami","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07MIA-2623281014&sailDate=2027-01-02&shipCode=IC&packageCode=IC07E484&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1788.93]],"BALCONY":[[0,1803.93]]}},{"id":"IC07W698_2027-01-09","shipCode":"IC","ship":"Icon of the Seas","date":"2027-01-09","nights":7,"port":"Miami","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07MIA-1694717396&sailDate=2027-01-09&shipCode=IC&packageCode=IC07W698&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,null]],"BALCONY":[[0,null],[1,2242.47],[2,2312.47],[3,null]]}},{"id":"IC07E484_2027-01-16","shipCode":"IC","ship":"Icon of the Seas","date":"2027-01-16","nights":7,"port":"Miami","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07MIA-2623281014&sailDate=2027-01-16&shipCode=IC&packageCode=IC07E484&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1763.93]],"BALCONY":[[0,1675.93]]}},{"id":"IC07W698_2027-01-23","shipCode":"IC","ship":"Icon of the Seas","date":"2027-01-23","nights":7,"port":"Miami","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07MIA-1694717396&sailDate=2027-01-23&shipCode=IC&packageCode=IC07W698&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,null]],"BALCONY":[[0,null],[1,2102.47],[2,null]]}},{"id":"IC07E484_2027-01-30","shipCode":"IC","ship":"Icon of the Seas","date":"2027-01-30","nights":7,"port":"Miami","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07MIA-2623281014&sailDate=2027-01-30&shipCode=IC&packageCode=IC07E484&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,2503.93],[2,2053.43]],"BALCONY":[[0,1745.93],[1,1985.93],[2,1745.93]]}},{"id":"IC07W698_2027-02-06","shipCode":"IC","ship":"Icon of the Seas","date":"2027-02-06","nights":7,"port":"Miami","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07MIA-1694717396&sailDate=2027-02-06&shipCode=IC&packageCode=IC07W698&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,2088.03]],"BALCONY":[[0,2031.03]]}},{"id":"IC07E484_2027-02-13","shipCode":"IC","ship":"Icon of the Seas","date":"2027-02-13","nights":7,"port":"Miami","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07MIA-2623281014&sailDate=2027-02-13&shipCode=IC&packageCode=IC07E484&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1833.93]],"BALCONY":[[0,1906.43]]}},{"id":"IC07W698_2027-02-20","shipCode":"IC","ship":"Icon of the Seas","date":"2027-02-20","nights":7,"port":"Miami","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07MIA-1694717396&sailDate=2027-02-20&shipCode=IC&packageCode=IC07W698&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1578.53]],"BALCONY":[[0,1591.03]]}},{"id":"IC07E484_2027-02-27","shipCode":"IC","ship":"Icon of the Seas","date":"2027-02-27","nights":7,"port":"Miami","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07MIA-2623281014&sailDate=2027-02-27&shipCode=IC&packageCode=IC07E484&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1803.93]],"BALCONY":[[0,1815.93]]}},{"id":"IC07W698_2027-03-06","shipCode":"IC","ship":"Icon of the Seas","date":"2027-03-06","nights":7,"port":"Miami","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07MIA-1694717396&sailDate=2027-03-06&shipCode=IC&packageCode=IC07W698&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,2188.32]],"BALCONY":[[0,2103.32]]}},{"id":"IC07E484_2027-03-13","shipCode":"IC","ship":"Icon of the Seas","date":"2027-03-13","nights":7,"port":"Miami","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07MIA-2623281014&sailDate=2027-03-13&shipCode=IC&packageCode=IC07E484&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1683.93]],"BALCONY":[[0,2046.43]]}},{"id":"IC07W698_2027-03-20","shipCode":"IC","ship":"Icon of the Seas","date":"2027-03-20","nights":7,"port":"Miami","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07MIA-1694717396&sailDate=2027-03-20&shipCode=IC&packageCode=IC07W698&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1958.82]],"BALCONY":[[0,1961.32]]}},{"id":"IC07E484_2027-03-27","shipCode":"IC","ship":"Icon of the Seas","date":"2027-03-27","nights":7,"port":"Miami","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07MIA-2623281014&sailDate=2027-03-27&shipCode=IC&packageCode=IC07E484&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,2003.93]],"BALCONY":[[0,1985.93]]}},{"id":"IC07W698_2027-04-03","shipCode":"IC","ship":"Icon of the Seas","date":"2027-04-03","nights":7,"port":"Miami","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07MIA-1694717396&sailDate=2027-04-03&shipCode=IC&packageCode=IC07W698&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1375.86]],"BALCONY":[[0,1538.86]]}},{"id":"IC07E484_2027-04-10","shipCode":"IC","ship":"Icon of the Seas","date":"2027-04-10","nights":7,"port":"Miami","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07MIA-2623281014&sailDate=2027-04-10&shipCode=IC&packageCode=IC07E484&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1736.43],[2,1503.43]],"BALCONY":[[0,1646.43]]}},{"id":"IC07W698_2027-04-17","shipCode":"IC","ship":"Icon of the Seas","date":"2027-04-17","nights":7,"port":"Miami","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07MIA-1694717396&sailDate=2027-04-17&shipCode=IC&packageCode=IC07W698&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1415.86]],"BALCONY":[[0,1588.36],[1,1750.86],[2,1588.36]]}},{"id":"IC07E484_2027-04-24","shipCode":"IC","ship":"Icon of the Seas","date":"2027-04-24","nights":7,"port":"Miami","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07MIA-2623281014&sailDate=2027-04-24&shipCode=IC&packageCode=IC07E484&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1759.43]],"BALCONY":[[0,1595.93]]}},{"id":"IC07W790_2027-05-01","shipCode":"IC","ship":"Icon of the Seas","date":"2027-05-01","nights":7,"port":"Miami","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07MIA-585762144&sailDate=2027-05-01&shipCode=IC&packageCode=IC07W790&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1768.76]],"BALCONY":[[0,2391.26],[1,2191.76]]}},{"id":"IC07E549_2027-05-08","shipCode":"IC","ship":"Icon of the Seas","date":"2027-05-08","nights":7,"port":"Miami","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07MIA-2623281014&sailDate=2027-05-08&shipCode=IC&packageCode=IC07E549&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1589.87]],"BALCONY":[[0,2713.37],[1,2150.87]]}},{"id":"IC07E549_2027-05-15","shipCode":"IC","ship":"Icon of the Seas","date":"2027-05-15","nights":7,"port":"Miami","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07MIA-2623281014&sailDate=2027-05-15&shipCode=IC&packageCode=IC07E549&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1561.37]],"BALCONY":[[0,1618.87]]}},{"id":"IC07W791_2027-05-22","shipCode":"IC","ship":"Icon of the Seas","date":"2027-05-22","nights":7,"port":"Miami","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07MIA-1694717396&sailDate=2027-05-22&shipCode=IC&packageCode=IC07W791&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1749.81]],"BALCONY":[[0,1831.81]]}},{"id":"IC07E550_2027-05-29","shipCode":"IC","ship":"Icon of the Seas","date":"2027-05-29","nights":7,"port":"Miami","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07MIA-2623281014&sailDate=2027-05-29&shipCode=IC&packageCode=IC07E550&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1812.8]],"BALCONY":[[0,2095.3]]}},{"id":"IC07E549_2027-06-05","shipCode":"IC","ship":"Icon of the Seas","date":"2027-06-05","nights":7,"port":"Miami","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07MIA-2623281014&sailDate=2027-06-05&shipCode=IC&packageCode=IC07E549&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1960.37]],"BALCONY":[[0,1980.37]]}},{"id":"IC07W791_2027-06-12","shipCode":"IC","ship":"Icon of the Seas","date":"2027-06-12","nights":7,"port":"Miami","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07MIA-1694717396&sailDate=2027-06-12&shipCode=IC&packageCode=IC07W791&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1932.31]],"BALCONY":[[0,2131.81]]}},{"id":"IC07E549_2027-06-19","shipCode":"IC","ship":"Icon of the Seas","date":"2027-06-19","nights":7,"port":"Miami","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07MIA-2623281014&sailDate=2027-06-19&shipCode=IC&packageCode=IC07E549&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,2141.37]],"BALCONY":[[0,2233.37]]}},{"id":"IC07E549_2027-06-26","shipCode":"IC","ship":"Icon of the Seas","date":"2027-06-26","nights":7,"port":"Miami","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07MIA-2623281014&sailDate=2027-06-26&shipCode=IC&packageCode=IC07E549&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,2291.37]],"BALCONY":[[0,2233.37]]}},{"id":"IC07W791_2027-07-03","shipCode":"IC","ship":"Icon of the Seas","date":"2027-07-03","nights":7,"port":"Miami","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07MIA-1694717396&sailDate=2027-07-03&shipCode=IC&packageCode=IC07W791&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1994.46]],"BALCONY":[[0,2076.46]]}},{"id":"IC07E549_2027-07-10","shipCode":"IC","ship":"Icon of the Seas","date":"2027-07-10","nights":7,"port":"Miami","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07MIA-2623281014&sailDate=2027-07-10&shipCode=IC&packageCode=IC07E549&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,2120.87]],"BALCONY":[[0,2273.87]]}},{"id":"IC07E549_2027-07-17","shipCode":"IC","ship":"Icon of the Seas","date":"2027-07-17","nights":7,"port":"Miami","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07MIA-2623281014&sailDate=2027-07-17&shipCode=IC&packageCode=IC07E549&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,2090.87]],"BALCONY":[[0,2213.87]]}},{"id":"IC07W791_2027-07-24","shipCode":"IC","ship":"Icon of the Seas","date":"2027-07-24","nights":7,"port":"Miami","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07MIA-1694717396&sailDate=2027-07-24&shipCode=IC&packageCode=IC07W791&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,2344.46]],"BALCONY":[[0,2396.46]]}},{"id":"IC07E549_2027-07-31","shipCode":"IC","ship":"Icon of the Seas","date":"2027-07-31","nights":7,"port":"Miami","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07MIA-2623281014&sailDate=2027-07-31&shipCode=IC&packageCode=IC07E549&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,2031.37]],"BALCONY":[[0,2223.37]]}},{"id":"IC09R025_2027-08-07","shipCode":"IC","ship":"Icon of the Seas","date":"2027-08-07","nights":9,"port":"Miami","name":"Perfect Day CocoCay to Texas Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC09MIA-2498268339&sailDate=2027-08-07&shipCode=IC&packageCode=IC09R025&destinationCode=ISLAN&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1883.83]],"BALCONY":[[0,2149.83]]}},{"id":"IC06W317_2027-08-16","shipCode":"IC","ship":"Icon of the Seas","date":"2027-08-16","nights":6,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC06GAL-1251154778&sailDate=2027-08-16&shipCode=IC&packageCode=IC06W317&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1464.88]],"BALCONY":[[0,1549.88]]}},{"id":"IC06W318_2027-08-22","shipCode":"IC","ship":"Icon of the Seas","date":"2027-08-22","nights":6,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC06GAL-1251154778&sailDate=2027-08-22&shipCode=IC&packageCode=IC06W318&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1346.96]],"BALCONY":[[0,1508.96]]}},{"id":"IC08W071_2027-08-28","shipCode":"IC","ship":"Icon of the Seas","date":"2027-08-28","nights":8,"port":"Galveston","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC08GAL-3243125344&sailDate=2027-08-28&shipCode=IC&packageCode=IC08W071&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1778.93]],"BALCONY":[[0,1719.93]]}},{"id":"IC06W318_2027-09-05","shipCode":"IC","ship":"Icon of the Seas","date":"2027-09-05","nights":6,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC06GAL-1251154778&sailDate=2027-09-05&shipCode=IC&packageCode=IC06W318&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1276.96]],"BALCONY":[[0,1239.46]]}},{"id":"IC08W071_2027-09-11","shipCode":"IC","ship":"Icon of the Seas","date":"2027-09-11","nights":8,"port":"Galveston","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC08GAL-3243125344&sailDate=2027-09-11&shipCode=IC&packageCode=IC08W071&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1799.43]],"BALCONY":[[0,1799.93]]}},{"id":"IC06W318_2027-09-19","shipCode":"IC","ship":"Icon of the Seas","date":"2027-09-19","nights":6,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC06GAL-1251154778&sailDate=2027-09-19&shipCode=IC&packageCode=IC06W318&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1199.46]],"BALCONY":[[0,1199.46]]}},{"id":"IC08W072_2027-09-25","shipCode":"IC","ship":"Icon of the Seas","date":"2027-09-25","nights":8,"port":"Galveston","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC08GAL-3243125344&sailDate=2027-09-25&shipCode=IC&packageCode=IC08W072&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1678.96]],"BALCONY":[[0,1679.46]]}},{"id":"IC06W319_2027-10-03","shipCode":"IC","ship":"Icon of the Seas","date":"2027-10-03","nights":6,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC06GAL-1251154778&sailDate=2027-10-03&shipCode=IC&packageCode=IC06W319&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1248.01]],"BALCONY":[[0,1320.51]]}},{"id":"IC08W072_2027-10-09","shipCode":"IC","ship":"Icon of the Seas","date":"2027-10-09","nights":8,"port":"Galveston","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC08GAL-3243125344&sailDate=2027-10-09&shipCode=IC&packageCode=IC08W072&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,2049.46]],"BALCONY":[[0,1896.46]]}},{"id":"IC06W319_2027-10-17","shipCode":"IC","ship":"Icon of the Seas","date":"2027-10-17","nights":6,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC06GAL-1251154778&sailDate=2027-10-17&shipCode=IC&packageCode=IC06W319&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1218.01]],"BALCONY":[[0,1239.51]]}},{"id":"IC08W072_2027-10-23","shipCode":"IC","ship":"Icon of the Seas","date":"2027-10-23","nights":8,"port":"Galveston","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC08GAL-3243125344&sailDate=2027-10-23&shipCode=IC&packageCode=IC08W072&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1699.46]],"BALCONY":[[0,1699.96]]}},{"id":"IC06W319_2027-10-31","shipCode":"IC","ship":"Icon of the Seas","date":"2027-10-31","nights":6,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC06GAL-1251154778&sailDate=2027-10-31&shipCode=IC&packageCode=IC06W319&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1328.51]],"BALCONY":[[0,1299.51]]}},{"id":"IC08W073_2027-11-06","shipCode":"IC","ship":"Icon of the Seas","date":"2027-11-06","nights":8,"port":"Galveston","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC08GAL-3243125344&sailDate=2027-11-06&shipCode=IC&packageCode=IC08W073&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1829.64]],"BALCONY":[[0,1829.64]]}},{"id":"IC07W792_2027-11-14","shipCode":"IC","ship":"Icon of the Seas","date":"2027-11-14","nights":7,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07GAL-3851841632&sailDate=2027-11-14&shipCode=IC&packageCode=IC07W792&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1349.81]],"BALCONY":[[0,1349.81]]}},{"id":"IC07W829_2027-11-21","shipCode":"IC","ship":"Icon of the Seas","date":"2027-11-21","nights":7,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07GAL-3851841632&sailDate=2027-11-21&shipCode=IC&packageCode=IC07W829&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1956.2]],"BALCONY":[[0,2029.7]]}},{"id":"IC07W793_2027-11-28","shipCode":"IC","ship":"Icon of the Seas","date":"2027-11-28","nights":7,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07GAL-3851841632&sailDate=2027-11-28&shipCode=IC&packageCode=IC07W793&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1349.7]],"BALCONY":[[0,1349.7]]}},{"id":"IC07W829_2027-12-05","shipCode":"IC","ship":"Icon of the Seas","date":"2027-12-05","nights":7,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07GAL-3851841632&sailDate=2027-12-05&shipCode=IC&packageCode=IC07W829&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1386.7]],"BALCONY":[[0,1399.7]]}},{"id":"IC07W793_2027-12-12","shipCode":"IC","ship":"Icon of the Seas","date":"2027-12-12","nights":7,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07GAL-3851841632&sailDate=2027-12-12&shipCode=IC&packageCode=IC07W793&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1349.7]],"BALCONY":[[0,1399.7]]}},{"id":"IC07W794_2027-12-19","shipCode":"IC","ship":"Icon of the Seas","date":"2027-12-19","nights":7,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07GAL-3851841632&sailDate=2027-12-19&shipCode=IC&packageCode=IC07W794&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1899.2]],"BALCONY":[[0,1900.2]]}},{"id":"IC07W795_2027-12-26","shipCode":"IC","ship":"Icon of the Seas","date":"2027-12-26","nights":7,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07GAL-3851841632&sailDate=2027-12-26&shipCode=IC&packageCode=IC07W795&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,2249.2]],"BALCONY":[[0,2250.2]]}},{"id":"IC07W793_2028-01-02","shipCode":"IC","ship":"Icon of the Seas","date":"2028-01-02","nights":7,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07GAL-3851841632&sailDate=2028-01-02&shipCode=IC&packageCode=IC07W793&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1299.2]],"BALCONY":[[0,1300.2]]}},{"id":"IC07W793_2028-01-09","shipCode":"IC","ship":"Icon of the Seas","date":"2028-01-09","nights":7,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07GAL-3851841632&sailDate=2028-01-09&shipCode=IC&packageCode=IC07W793&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1219.2]],"BALCONY":[[0,1219.7]]}},{"id":"IC07W829_2028-01-16","shipCode":"IC","ship":"Icon of the Seas","date":"2028-01-16","nights":7,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07GAL-3851841632&sailDate=2028-01-16&shipCode=IC&packageCode=IC07W829&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1199.7]],"BALCONY":[[0,1200.2]]}},{"id":"IC07W793_2028-01-23","shipCode":"IC","ship":"Icon of the Seas","date":"2028-01-23","nights":7,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07GAL-3851841632&sailDate=2028-01-23&shipCode=IC&packageCode=IC07W793&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1228.2]],"BALCONY":[[0,1229.2]]}},{"id":"IC07W793_2028-01-30","shipCode":"IC","ship":"Icon of the Seas","date":"2028-01-30","nights":7,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07GAL-3851841632&sailDate=2028-01-30&shipCode=IC&packageCode=IC07W793&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1229.2]],"BALCONY":[[0,1230.2]]}},{"id":"IC07W793_2028-02-06","shipCode":"IC","ship":"Icon of the Seas","date":"2028-02-06","nights":7,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07GAL-3851841632&sailDate=2028-02-06&shipCode=IC&packageCode=IC07W793&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1249.2]],"BALCONY":[[0,1249.7]]}},{"id":"IC07W829_2028-02-13","shipCode":"IC","ship":"Icon of the Seas","date":"2028-02-13","nights":7,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07GAL-3851841632&sailDate=2028-02-13&shipCode=IC&packageCode=IC07W829&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,2071.2]],"BALCONY":[[0,1849.7]]}},{"id":"IC07W793_2028-02-20","shipCode":"IC","ship":"Icon of the Seas","date":"2028-02-20","nights":7,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07GAL-3851841632&sailDate=2028-02-20&shipCode=IC&packageCode=IC07W793&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1399.2]],"BALCONY":[[0,1399.7]]}},{"id":"IC07W793_2028-02-27","shipCode":"IC","ship":"Icon of the Seas","date":"2028-02-27","nights":7,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07GAL-3851841632&sailDate=2028-02-27&shipCode=IC&packageCode=IC07W793&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1299.2]],"BALCONY":[[0,1300.2]]}},{"id":"IC07W793_2028-03-05","shipCode":"IC","ship":"Icon of the Seas","date":"2028-03-05","nights":7,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07GAL-3851841632&sailDate=2028-03-05&shipCode=IC&packageCode=IC07W793&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1279.7]],"BALCONY":[[0,1279.7]]}},{"id":"IC07W829_2028-03-12","shipCode":"IC","ship":"Icon of the Seas","date":"2028-03-12","nights":7,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07GAL-3851841632&sailDate=2028-03-12&shipCode=IC&packageCode=IC07W829&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1449.7]],"BALCONY":[[0,1449.7]]}},{"id":"IC07W793_2028-03-19","shipCode":"IC","ship":"Icon of the Seas","date":"2028-03-19","nights":7,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07GAL-3851841632&sailDate=2028-03-19&shipCode=IC&packageCode=IC07W793&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1350.2]],"BALCONY":[[0,1350.7]]}},{"id":"IC07W829_2028-03-26","shipCode":"IC","ship":"Icon of the Seas","date":"2028-03-26","nights":7,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07GAL-3851841632&sailDate=2028-03-26&shipCode=IC&packageCode=IC07W829&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1319.2]],"BALCONY":[[0,1319.7]]}},{"id":"IC07W793_2028-04-02","shipCode":"IC","ship":"Icon of the Seas","date":"2028-04-02","nights":7,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07GAL-3851841632&sailDate=2028-04-02&shipCode=IC&packageCode=IC07W793&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1279.7]],"BALCONY":[[0,1279.7]]}},{"id":"IC07W793_2028-04-09","shipCode":"IC","ship":"Icon of the Seas","date":"2028-04-09","nights":7,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07GAL-3851841632&sailDate=2028-04-09&shipCode=IC&packageCode=IC07W793&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1249.2]],"BALCONY":[[0,1249.7]]}},{"id":"IC07W793_2028-04-16","shipCode":"IC","ship":"Icon of the Seas","date":"2028-04-16","nights":7,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07GAL-3851841632&sailDate=2028-04-16&shipCode=IC&packageCode=IC07W793&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1279.7]],"BALCONY":[[0,1279.7]]}},{"id":"IC07W941_2028-04-23","shipCode":"IC","ship":"Icon of the Seas","date":"2028-04-23","nights":7,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07GAL-3851841632&sailDate=2028-04-23&shipCode=IC&packageCode=IC07W941&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1298.38]],"BALCONY":[[0,1298.38]]}},{"id":"IC06W397_2028-04-30","shipCode":"IC","ship":"Icon of the Seas","date":"2028-04-30","nights":6,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC06GAL-1251154778&sailDate=2028-04-30&shipCode=IC&packageCode=IC06W397&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1148.38]],"BALCONY":[[0,1148.88]]}},{"id":"IC08W115_2028-05-06","shipCode":"IC","ship":"Icon of the Seas","date":"2028-05-06","nights":8,"port":"Galveston","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC08GAL-3243125344&sailDate=2028-05-06&shipCode=IC&packageCode=IC08W115&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1698.53]],"BALCONY":[[0,1698.53]]}},{"id":"IC06W397_2028-05-14","shipCode":"IC","ship":"Icon of the Seas","date":"2028-05-14","nights":6,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC06GAL-1251154778&sailDate=2028-05-14&shipCode=IC&packageCode=IC06W397&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1197.88]],"BALCONY":[[0,1198.88]]}},{"id":"IC08W115_2028-05-20","shipCode":"IC","ship":"Icon of the Seas","date":"2028-05-20","nights":8,"port":"Galveston","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC08GAL-3243125344&sailDate=2028-05-20&shipCode=IC&packageCode=IC08W115&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1798.53]],"BALCONY":[[0,1799.03]]}},{"id":"IC06W398_2028-05-28","shipCode":"IC","ship":"Icon of the Seas","date":"2028-05-28","nights":6,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC06GAL-1251154778&sailDate=2028-05-28&shipCode=IC&packageCode=IC06W398&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1398.12]],"BALCONY":[[0,1398.62]]}},{"id":"IC08W115_2028-06-03","shipCode":"IC","ship":"Icon of the Seas","date":"2028-06-03","nights":8,"port":"Galveston","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC08GAL-3243125344&sailDate=2028-06-03&shipCode=IC&packageCode=IC08W115&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1998.33]],"BALCONY":[[0,1998.83]]}},{"id":"IC06W397_2028-06-11","shipCode":"IC","ship":"Icon of the Seas","date":"2028-06-11","nights":6,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC06GAL-1251154778&sailDate=2028-06-11&shipCode=IC&packageCode=IC06W397&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1447.88]],"BALCONY":[[0,1448.88]]}},{"id":"IC08W116_2028-06-17","shipCode":"IC","ship":"Icon of the Seas","date":"2028-06-17","nights":8,"port":"Galveston","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC08GAL-3243125344&sailDate=2028-06-17&shipCode=IC&packageCode=IC08W116&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1998.35]],"BALCONY":[[0,1998.85]]}},{"id":"IC06W397_2028-06-25","shipCode":"IC","ship":"Icon of the Seas","date":"2028-06-25","nights":6,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC06GAL-1251154778&sailDate=2028-06-25&shipCode=IC&packageCode=IC06W397&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1447.88]],"BALCONY":[[0,1448.88]]}},{"id":"IC08W115_2028-07-01","shipCode":"IC","ship":"Icon of the Seas","date":"2028-07-01","nights":8,"port":"Galveston","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC08GAL-3243125344&sailDate=2028-07-01&shipCode=IC&packageCode=IC08W115&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,2098.83]],"BALCONY":[[0,2098.83]]}},{"id":"IC06W397_2028-07-09","shipCode":"IC","ship":"Icon of the Seas","date":"2028-07-09","nights":6,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC06GAL-1251154778&sailDate=2028-07-09&shipCode=IC&packageCode=IC06W397&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1447.88]],"BALCONY":[[0,1448.88]]}},{"id":"IC08W115_2028-07-15","shipCode":"IC","ship":"Icon of the Seas","date":"2028-07-15","nights":8,"port":"Galveston","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC08GAL-3243125344&sailDate=2028-07-15&shipCode=IC&packageCode=IC08W115&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1998.33]],"BALCONY":[[0,1998.83]]}},{"id":"IC06W397_2028-07-23","shipCode":"IC","ship":"Icon of the Seas","date":"2028-07-23","nights":6,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC06GAL-1251154778&sailDate=2028-07-23&shipCode=IC&packageCode=IC06W397&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1447.88]],"BALCONY":[[0,1448.88]]}},{"id":"IC08W116_2028-07-29","shipCode":"IC","ship":"Icon of the Seas","date":"2028-07-29","nights":8,"port":"Galveston","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC08GAL-3243125344&sailDate=2028-07-29&shipCode=IC&packageCode=IC08W116&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1998.35]],"BALCONY":[[0,1998.85]]}},{"id":"IC06W397_2028-08-06","shipCode":"IC","ship":"Icon of the Seas","date":"2028-08-06","nights":6,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC06GAL-1251154778&sailDate=2028-08-06&shipCode=IC&packageCode=IC06W397&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1248.38]],"BALCONY":[[0,1248.88]]}},{"id":"IC08W115_2028-08-12","shipCode":"IC","ship":"Icon of the Seas","date":"2028-08-12","nights":8,"port":"Galveston","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC08GAL-3243125344&sailDate=2028-08-12&shipCode=IC&packageCode=IC08W115&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1798.53]],"BALCONY":[[0,1799.03]]}},{"id":"IC06W397_2028-08-20","shipCode":"IC","ship":"Icon of the Seas","date":"2028-08-20","nights":6,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC06GAL-1251154778&sailDate=2028-08-20&shipCode=IC&packageCode=IC06W397&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1197.88]],"BALCONY":[[0,1198.88]]}},{"id":"IC08W115_2028-08-26","shipCode":"IC","ship":"Icon of the Seas","date":"2028-08-26","nights":8,"port":"Galveston","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC08GAL-3243125344&sailDate=2028-08-26&shipCode=IC&packageCode=IC08W115&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1698.53]],"BALCONY":[[0,1698.53]]}},{"id":"IC06W397_2028-09-03","shipCode":"IC","ship":"Icon of the Seas","date":"2028-09-03","nights":6,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC06GAL-1251154778&sailDate=2028-09-03&shipCode=IC&packageCode=IC06W397&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1248.38]],"BALCONY":[[0,1248.88]]}},{"id":"IC08W116_2028-09-09","shipCode":"IC","ship":"Icon of the Seas","date":"2028-09-09","nights":8,"port":"Galveston","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC08GAL-3243125344&sailDate=2028-09-09&shipCode=IC&packageCode=IC08W116&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1698.06]],"BALCONY":[[0,1699.06]]}},{"id":"IC06W397_2028-09-17","shipCode":"IC","ship":"Icon of the Seas","date":"2028-09-17","nights":6,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC06GAL-1251154778&sailDate=2028-09-17&shipCode=IC&packageCode=IC06W397&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1148.38]],"BALCONY":[[0,1148.88]]}},{"id":"IC08W115_2028-09-23","shipCode":"IC","ship":"Icon of the Seas","date":"2028-09-23","nights":8,"port":"Galveston","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC08GAL-3243125344&sailDate=2028-09-23&shipCode=IC&packageCode=IC08W115&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1698.53]],"BALCONY":[[0,1698.53]]}},{"id":"IC06W397_2028-10-01","shipCode":"IC","ship":"Icon of the Seas","date":"2028-10-01","nights":6,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC06GAL-1251154778&sailDate=2028-10-01&shipCode=IC&packageCode=IC06W397&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1148.38]],"BALCONY":[[0,1148.88]]}},{"id":"IC08W115_2028-10-07","shipCode":"IC","ship":"Icon of the Seas","date":"2028-10-07","nights":8,"port":"Galveston","name":"Perfect Day CocoCay & Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC08GAL-3243125344&sailDate=2028-10-07&shipCode=IC&packageCode=IC08W115&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1798.53]],"BALCONY":[[0,1799.03]]}},{"id":"IC07W942_2028-10-15","shipCode":"IC","ship":"Icon of the Seas","date":"2028-10-15","nights":7,"port":"Galveston","name":"Western Caribbean Cruise","url":"https://www.royalcaribbean.com/booking/landing?groupId=IC07GAL-3851841632&sailDate=2028-10-15&shipCode=IC&packageCode=IC07W942&destinationCode=CARIB&selectedCurrencyCode=USD&country=USA","cabins":{"OUTSIDE":[[0,1298.07]],"BALCONY":[[0,1299.07]]}}],"alerts":[{"alertedAt":"2026-11-24T04:23:17.613Z","runId":"20261124T042315Z","sailingId":"IC07E549_2027-05-08","cabinClass":"BALCONY","reference":2713.37,"price":2150.87,"issue":4},{"alertedAt":"2026-11-24T04:23:17.613Z","runId":"20261124T042315Z","sailingId":"IC07W698_2026-11-28","cabinClass":"BALCONY","reference":1474.89,"price":1204.89,"issue":4},{"alertedAt":"2026-11-24T04:23:17.613Z","runId":"20261124T042315Z","sailingId":"IC07W790_2027-05-01","cabinClass":"BALCONY","reference":2391.26,"price":2191.76,"issue":4},{"alertedAt":"2026-11-24T13:08:18.990Z","runId":"20261124T130816Z","sailingId":"IC07E484_2027-01-30","cabinClass":"OUTSIDE","reference":2503.93,"price":2053.43,"issue":5},{"alertedAt":"2026-11-24T13:08:18.990Z","runId":"20261124T130816Z","sailingId":"IC07E484_2027-04-10","cabinClass":"OUTSIDE","reference":1736.43,"price":1503.43,"issue":5}],"watchlist":{"alerts":{"minDropPct":5,"minDropUsd":50},"ships":[{"code":"IC","name":"Icon of the Seas","minNights":5,"cabins":["OUTSIDE","BALCONY"]}]},"fleet":[{"code":"AD","name":"Adventure of the Seas"},{"code":"AL","name":"Allure of the Seas"},{"code":"AN","name":"Anthem of the Seas"},{"code":"BR","name":"Brilliance of the Seas"},{"code":"EN","name":"Enchantment of the Seas"},{"code":"EX","name":"Explorer of the Seas"},{"code":"FR","name":"Freedom of the Seas"},{"code":"GR","name":"Grandeur of the Seas"},{"code":"HM","name":"Harmony of the Seas"},{"code":"IC","name":"Icon of the Seas"},{"code":"ID","name":"Independence of the Seas"},{"code":"JW","name":"Jewel of the Seas"},{"code":"LE","name":"Legend of the Seas"},{"code":"LB","name":"Liberty of the Seas"},{"code":"MA","name":"Mariner of the Seas"},{"code":"NV","name":"Navigator of the Seas"},{"code":"OA","name":"Oasis of the Seas"},{"code":"OY","name":"Odyssey of the Seas"},{"code":"OV","name":"Ovation of the Seas"},{"code":"QN","name":"Quantum of the Seas"},{"code":"RD","name":"Radiance of the Seas"},{"code":"SR","name":"Serenade of the Seas"},{"code":"SC","name":"Spectrum of the Seas"},{"code":"ST","name":"Star of the Seas"},{"code":"SY","name":"Symphony of the Seas"},{"code":"UT","name":"Utopia of the Seas"},{"code":"VI","name":"Vision of the Seas"},{"code":"VY","name":"Voyager of the Seas"},{"code":"WN","name":"Wonder of the Seas"}],"editUrl":"https://github.com/uc2pac/cruisewatch/edit/main/watchlist.json"}</script>
 <script>
+"use strict";
 const D = JSON.parse(document.getElementById("data").textContent);
+const ORDER = ["INTERIOR", "OUTSIDE", "BALCONY", "DELUXE"];
 const NAMES = { INTERIOR: "Interior", OUTSIDE: "Ocean view", BALCONY: "Balcony", DELUXE: "Suite" };
-const COLORS = ["var(--s1)", "var(--s2)", "var(--s3)", "var(--s4)"];
-const cabins = D.cabinOrder.filter((c) => D.sailings.some((s) => s.cabins[c]));
-const usd = (n) => n == null ? "—" : "$" + Math.round(n).toLocaleString("en-US");
-const fmtDate = (iso) => new Date(iso).toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
-const el = (tag, props = {}, ...kids) => { const e = Object.assign(document.createElement(tag), props); for (const k of kids) e.append(k); return e; };
-const byId = new Map(D.sailings.map((s) => [s.id, s]));
+const color = (c) => `var(--c-${c})`;
+const T = D.runs.map((r) => Date.parse(r));
+const LAST = T.length - 1;
+const FLEET = new Map(D.fleet.map((s) => [s.code, s.name]));
 
+// ---------- formatting ----------
+const usd = (n) => (n == null ? "—" : "$" + Math.round(n).toLocaleString("en-US"));
+const signed = (n) => (n < 0 ? "−" : "+") + usd(Math.abs(n));
+const pctOf = (d, base) => (Math.abs(d / base) * 100).toFixed(1).replace(/\.0$/, "") + "%";
+const F = {
+  day: new Intl.DateTimeFormat("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric", timeZone: "UTC" }),
+  dayShort: new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "2-digit", timeZone: "UTC" }),
+  month: new Intl.DateTimeFormat("en-US", { month: "short", year: "2-digit", timeZone: "UTC" }),
+  time: new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }),
+  date: new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric" }),
+};
+const sailMs = (d) => Date.parse(d + "T00:00:00Z");
+const fmtSail = (d) => F.day.format(sailMs(d));
+const fmtSailShort = (d) => F.dayShort.format(sailMs(d));
+const fmtTime = (ms) => F.time.format(ms);
+
+// ---------- dom ----------
+const $ = (id) => document.getElementById(id);
+function el(tag, props, ...kids) {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(props || {})) {
+    if (k === "class") e.className = v;
+    else if (k === "style") e.style.cssText = v;
+    else if (k.startsWith("on")) e[k] = v;
+    else if (k in e) e[k] = v;
+    else e.setAttribute(k, v);
+  }
+  for (const k of kids.flat()) if (k != null && k !== false) e.append(k);
+  return e;
+}
+const NS = "http://www.w3.org/2000/svg";
+function svgEl(tag, attrs, text) {
+  const e = document.createElementNS(NS, tag);
+  for (const [k, v] of Object.entries(attrs || {})) e.setAttribute(k, v);
+  if (text != null) e.textContent = text;
+  return e;
+}
+const store = {
+  get(k, d) { try { const v = localStorage.getItem("cw." + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
+  set(k, v) { try { localStorage.setItem("cw." + k, JSON.stringify(v)); } catch {} },
+};
+
+// ---------- price maths (display only; alert rules live in src/prices.ts) ----------
+// series: [[runIndex, price|null], ...] holding only the points where the price changed.
+function priceAt(series, r) {
+  let v;
+  for (const [i, p] of series) { if (i > r) break; v = p; }
+  return v; // undefined = not seen yet; null = not available
+}
 function stats(series) {
-  const prices = series.map((p) => p[1]).filter((p) => p != null);
-  const now = series[series.length - 1][1];
-  return { now, first: prices[0], low: prices.length ? Math.min(...prices) : null, changed: series.length > 1 };
+  let first, firstR, low = Infinity, lowR, high = -Infinity, highR;
+  for (const [r, p] of series) {
+    if (p == null) continue;
+    if (first == null) { first = p; firstR = r; }
+    if (p < low) { low = p; lowR = r; }
+    if (p > high) { high = p; highR = r; }
+  }
+  const now = priceAt(series, LAST);
+  return { now, first, firstR, low: first == null ? null : low, lowR, high: first == null ? null : high, highR };
+}
+for (const s of D.sailings) {
+  s.ms = sailMs(s.date);
+  s.st = {};
+  for (const c in s.cabins) s.st[c] = stats(s.cabins[c]);
+}
+const cabinsInData = ORDER.filter((c) => D.sailings.some((s) => s.cabins[c]));
+const shipsInData = [...new Set(D.sailings.map((s) => s.shipCode))];
+
+// ---------- filters ----------
+const F0 = store.get("filters", {});
+const state = {
+  ship: shipsInData.includes(F0.ship) ? F0.ship : "all",
+  cabins: new Set((F0.cabins || cabinsInData).filter((c) => cabinsInData.includes(c))),
+  from: F0.from || "", to: F0.to || "", minNights: F0.minNights || "",
+  window: store.get("window", "check"), sort: store.get("sort", "date"), showAll: false,
+};
+if (!state.cabins.size) cabinsInData.forEach((c) => state.cabins.add(c));
+const saveFilters = () => store.set("filters", { ship: state.ship, cabins: [...state.cabins], from: state.from, to: state.to, minNights: state.minNights });
+const visibleCabins = () => cabinsInData.filter((c) => state.cabins.has(c));
+const filtered = () => D.sailings.filter((s) =>
+  (state.ship === "all" || s.shipCode === state.ship) &&
+  (!state.from || s.date >= state.from) && (!state.to || s.date <= state.to) &&
+  (!state.minNights || s.nights >= +state.minNights));
+
+function renderFilters() {
+  const box = $("filters");
+  box.replaceChildren();
+  if (shipsInData.length > 1) {
+    const sel = el("select", { onchange: (e) => { state.ship = e.target.value; saveFilters(); renderAll(); } },
+      el("option", { value: "all", textContent: "All ships" }),
+      shipsInData.map((c) => el("option", { value: c, textContent: FLEET.get(c) || c, selected: state.ship === c })));
+    box.append(el("label", {}, "Ship", sel));
+  }
+  box.append(el("span", { style: "display:flex;gap:6px;flex-wrap:wrap" }, cabinsInData.map((c) => {
+    const lab = el("label", { class: "cabin-toggle" + (state.cabins.has(c) ? " on" : "") },
+      el("input", { type: "checkbox", checked: state.cabins.has(c), onchange: () => {
+        if (state.cabins.has(c) && state.cabins.size > 1) state.cabins.delete(c); else state.cabins.add(c);
+        saveFilters(); renderFilters(); renderAll();
+      } }),
+      el("i", { style: `background:${color(c)}` }), NAMES[c] || c);
+    return lab;
+  })));
+  const dateInput = (key) => el("input", { type: "date", value: state[key], onchange: (e) => { state[key] = e.target.value; saveFilters(); renderAll(); } });
+  box.append(el("label", {}, "Sailing from", dateInput("from")), el("label", {}, "to", dateInput("to")));
+  box.append(el("label", {}, "Min nights", el("input", { type: "number", min: 1, max: 30, style: "width:64px", value: state.minNights,
+    onchange: (e) => { state.minNights = e.target.value; saveFilters(); renderAll(); } })));
+  if (state.from || state.to || state.minNights || state.ship !== "all" || state.cabins.size !== cabinsInData.length)
+    box.append(el("button", { class: "link", textContent: "Reset", onclick: () => {
+      Object.assign(state, { ship: "all", from: "", to: "", minNights: "" }); cabinsInData.forEach((c) => state.cabins.add(c));
+      saveFilters(); renderFilters(); renderAll(); } }));
 }
 
-document.getElementById("sub").textContent =
-  D.sailings.length + " sailings · " + D.runs.length + " price checks since " + (D.runs[0] ? fmtDate(D.runs[0]) : "—") +
-  " · updated " + fmtDate(D.generatedAt);
+// ---------- header ----------
+function renderHeader() {
+  const last = T[LAST];
+  $("status").textContent = LAST < 0 ? "No price checks yet." :
+    `Last checked ${fmtTime(last)} · ${T.length} checks since ${F.date.format(T[0])} · checked twice a day (8 AM and 8 PM New York time)`;
+  const chips = D.watchlist.ships.map((w) => {
+    const parts = [w.name || FLEET.get(w.code) || w.code];
+    parts.push(w.from || w.to ? `${w.from ? fmtSailShort(w.from) : "now"} – ${w.to ? fmtSailShort(w.to) : "any time"}` : "all dates");
+    if (w.minNights) parts.push(`${w.minNights}+ nights`);
+    parts.push(w.cabins && w.cabins.length ? w.cabins.map((c) => NAMES[c] || c).join(", ") : "all cabins");
+    return el("span", { class: "chip", textContent: parts.join(" · ") });
+  });
+  const a = D.watchlist.alerts || {};
+  chips.push(el("span", { class: "chip muted", textContent: `Email when a price drops ${a.minDropPct ?? 5}% and $${a.minDropUsd ?? 50}+` }));
+  $("tracking").replaceChildren(...chips);
+}
 
-if (D.alerts.length) {
-  document.getElementById("alerts-wrap").hidden = false;
-  const ul = document.getElementById("alerts");
-  for (const a of D.alerts) {
-    const s = byId.get(a.id);
-    ul.append(el("li", {}, fmtDate(a.at) + " · " + (s ? s.date + " " + s.nights + "n " + s.port : a.id) + " · " + (NAMES[a.cabin] || a.cabin) + " ",
-      el("span", { className: "muted", textContent: usd(a.from) + " → " }), el("b", { className: "down", textContent: usd(a.to) })));
+// ---------- what changed ----------
+const WINDOWS = [["check", "Since last check"], ["week", "Last 7 days"], ["all", "Since tracking began"]];
+function windowStart() {
+  if (state.window === "check") return LAST - 1;
+  if (state.window === "week") { const cut = T[LAST] - 7 * 864e5; let i = -1; T.forEach((t, k) => { if (t < cut) i = k; }); return i; }
+  return -1;
+}
+function renderChanges() {
+  $("window").replaceChildren(...WINDOWS.map(([k, label]) => el("button", { class: state.window === k ? "on" : "", textContent: label,
+    onclick: () => { state.window = k; store.set("window", k); state.showAll = false; renderChanges(); } })));
+  const list = $("changes"), sum = $("changes-summary"), more = $("changes-more");
+  list.replaceChildren(); more.hidden = true;
+  if (LAST < 1) { sum.textContent = "Only one price check so far. Changes show up after the next check."; return; }
+  const start = windowStart();
+  const rows = []; let same = 0;
+  for (const s of filtered()) for (const c of visibleCabins()) {
+    const series = s.cabins[c]; if (!series) continue;
+    const now = s.st[c].now;
+    const before = start < 0 ? s.st[c].first : priceAt(series, start);
+    if (now == null || before == null) continue;
+    if (now === before) { same++; continue; }
+    rows.push({ s, c, before, now, d: now - before, p: (now - before) / before });
+  }
+  rows.sort((a, b) => a.p - b.p);
+  const drops = rows.filter((r) => r.d < 0).length, rises = rows.length - drops;
+  const since = state.window === "check" ? `since the previous check (${fmtTime(T[LAST - 1])})`
+    : state.window === "week" ? "over the last 7 days" : `since tracking began (${F.date.format(T[0])})`;
+  sum.replaceChildren(
+    el("b", { textContent: `${drops} ${drops === 1 ? "price" : "prices"} dropped` }), ", ",
+    el("b", { textContent: `${rises} rose` }), `, ${same} unchanged ${since}.`);
+  if (!rows.length) { list.append(el("li", { class: "empty", textContent: "No price changes in this period." })); return; }
+  const shown = state.showAll ? rows : rows.slice(0, 12);
+  for (const r of shown) {
+    const dir = r.d < 0 ? "down" : "up";
+    const low = r.d < 0 && r.now === r.s.st[r.c].low && r.now < r.s.st[r.c].first;
+    list.append(el("li", { class: "change", onclick: () => openDetail(r.s.id) },
+      el("span", { class: `badge ${dir}`, textContent: `${r.d < 0 ? "▼" : "▲"} ${pctOf(r.d, r.before)}` }),
+      el("div", { class: "what" },
+        el("b", { textContent: `${fmtSail(r.s.date)} · ${NAMES[r.c] || r.c}` }),
+        el("span", { textContent: `${r.s.nights} nights from ${r.s.port}${shipsInData.length > 1 ? " · " + r.s.ship : ""} · ${r.s.name}` })),
+      el("div", { class: "prices" }, el("s", { textContent: usd(r.before) }), "→ ", el("b", { textContent: usd(r.now) }),
+        el("span", { class: `delta ${dir}`, textContent: signed(r.d) }), low ? el("span", { class: "tag-low", textContent: "lowest so far" }) : null),
+      spark(r.s.cabins[r.c], 70, 24)));
+  }
+  if (rows.length > shown.length || state.showAll) {
+    more.hidden = false;
+    more.textContent = state.showAll ? "Show fewer" : `Show all ${rows.length} changes`;
+    more.onclick = () => { state.showAll = !state.showAll; renderChanges(); };
   }
 }
 
-const head = document.getElementById("head");
-head.append(el("tr", {}, el("th", { textContent: "Sail date" }), el("th", { textContent: "Nights" }), el("th", { textContent: "From" }),
-  ...cabins.map((c) => el("th", { className: "num", textContent: NAMES[c] || c })), el("th", { textContent: "Itinerary" }), el("th", { textContent: "" })));
-
-function cell(series) {
-  if (!series) return el("td", { className: "num muted", textContent: "—" });
-  const st = stats(series);
-  const td = el("td", { className: "num" }, el("span", { className: "price", textContent: usd(st.now) }));
-  if (st.now != null && st.first != null && st.now !== st.first) {
-    const d = st.now - st.first;
-    td.append(el("span", { className: "delta " + (d < 0 ? "down" : "up"), textContent: (d < 0 ? "−" : "+") + usd(Math.abs(d)) }));
-  }
-  if (st.changed && st.now != null && st.now === st.low && st.now < st.first) td.append(el("span", { className: "low", textContent: "low" }));
-  return td;
+// ---------- charts ----------
+function niceStep(range, n) {
+  const raw = range / n, mag = Math.pow(10, Math.floor(Math.log10(raw)));
+  const f = raw / mag;
+  return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 5 ? 5 : 10) * mag;
 }
-
-function chart(s) {
-  const W = 900, H = 200, L = 56, R = 12, T = 10, B = 24;
-  const n = Math.max(D.runs.length - 1, 1);
-  const series = cabins.filter((c) => s.cabins[c]).map((c, i) => ({ c, color: COLORS[cabins.indexOf(c) % 4], pts: s.cabins[c] }));
-  const vals = series.flatMap((x) => x.pts.map((p) => p[1])).filter((v) => v != null);
-  if (!vals.length) return el("div", { className: "muted", textContent: "No prices yet." });
+function spark(series, w = 64, h = 20) {
+  const pts = [...series, [LAST, priceAt(series, LAST)]].filter((p) => p[1] != null);
+  const svg = svgEl("svg", { width: w, height: h, class: "spark", "aria-hidden": "true" });
+  if (pts.length < 2 || LAST < 1) return svg;
+  const vals = pts.map((p) => p[1]);
   let lo = Math.min(...vals), hi = Math.max(...vals);
-  if (hi - lo < 20) { lo -= 10; hi += 10; }
-  const pad = (hi - lo) * 0.08; lo -= pad; hi += pad;
-  const x = (r) => L + (r / n) * (W - L - R), y = (v) => T + (1 - (v - lo) / (hi - lo)) * (H - T - B);
-  const ns = "http://www.w3.org/2000/svg";
-  const svg = document.createElementNS(ns, "svg");
-  svg.setAttribute("viewBox", "0 0 " + W + " " + H); svg.setAttribute("width", "100%"); svg.setAttribute("role", "img");
-  const add = (tag, attrs, text) => { const e = document.createElementNS(ns, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (text) e.textContent = text; svg.append(e); return e; };
-  for (let i = 0; i <= 3; i++) {
-    const v = lo + ((hi - lo) * i) / 3;
-    add("line", { x1: L, x2: W - R, y1: y(v), y2: y(v), stroke: "var(--line)" });
-    add("text", { x: L - 6, y: y(v) + 4, "text-anchor": "end" }, usd(v));
-  }
-  add("text", { x: L, y: H - 6 }, D.runs[0] ? fmtDate(D.runs[0]) : "");
-  add("text", { x: W - R, y: H - 6, "text-anchor": "end" }, fmtDate(D.runs[D.runs.length - 1]));
-  for (const sr of series) {
-    // Step line: a price holds until the next change; extend to the latest run.
-    let d = "", prev = null;
-    const pts = [...sr.pts, [D.runs.length - 1, sr.pts[sr.pts.length - 1][1]]];
-    for (const [r, v] of pts) {
-      if (v == null) { prev = null; continue; }
-      if (prev == null) d += "M" + x(r) + " " + y(v);
-      else d += "H" + x(r) + "V" + y(v);
-      prev = v;
+  if (hi === lo) { lo -= 1; hi += 1; }
+  const x = (r) => 1 + (r / LAST) * (w - 2), y = (v) => 2 + (1 - (v - lo) / (hi - lo)) * (h - 4);
+  let d = "";
+  pts.forEach(([r, v], i) => { d += i === 0 ? `M${x(r)} ${y(v)}` : `H${x(r)}V${y(v)}`; });
+  const first = vals[0], now = vals[vals.length - 1];
+  const stroke = now < first ? "var(--down)" : now > first ? "var(--up)" : "var(--faint)";
+  svg.append(svgEl("path", { d, fill: "none", stroke, "stroke-width": 1.5, "stroke-linejoin": "round" }));
+  return svg;
+}
+
+/**
+ * Line chart with hover. series: [{ key, color, pts: [[x, y|null]] }]. step: hold each value until the next x.
+ * xs: sorted x values the hover snaps to. tip(x) -> Node. onClick(x). xFmt(x) -> axis label.
+ */
+const charts = [];
+function lineChart(box, opts) {
+  const draw = () => {
+    box.replaceChildren();
+    const W = Math.max(box.clientWidth || 600, 280), H = opts.height || 260;
+    const L = 54, R = 12, Tp = 10, B = 26;
+    const all = opts.series.flatMap((s) => s.pts).filter((p) => p[1] != null);
+    if (!all.length) { box.append(el("p", { class: "empty", textContent: "No prices to show for these filters." })); return; }
+    let x0 = opts.xMin ?? Math.min(...all.map((p) => p[0])), x1 = opts.xMax ?? Math.max(...all.map((p) => p[0]));
+    if (x0 === x1) { x0 -= 864e5; x1 += 864e5; }
+    let lo = Math.min(...all.map((p) => p[1])), hi = Math.max(...all.map((p) => p[1]));
+    if (hi - lo < 40) { lo -= 20; hi += 20; }
+    const step = niceStep(hi - lo, 4);
+    lo = Math.floor(lo / step) * step; hi = Math.ceil(hi / step) * step;
+    const X = (v) => L + ((v - x0) / (x1 - x0)) * (W - L - R), Y = (v) => Tp + (1 - (v - lo) / (hi - lo)) * (H - Tp - B);
+    const svg = svgEl("svg", { width: W, height: H, role: "img" });
+    for (let v = lo; v <= hi + 1e-9; v += step) {
+      svg.append(svgEl("line", { x1: L, x2: W - R, y1: Y(v), y2: Y(v), stroke: "var(--line)" }));
+      svg.append(svgEl("text", { x: L - 8, y: Y(v) + 4, "text-anchor": "end" }, usd(v)));
     }
-    add("path", { d, fill: "none", stroke: sr.color, "stroke-width": 2, "stroke-linejoin": "round" });
-    for (const [r, v] of sr.pts) if (v != null) add("circle", { cx: x(r), cy: y(v), r: 2.5, fill: sr.color }).append(Object.assign(document.createElementNS(ns, "title"), { textContent: (NAMES[sr.c] || sr.c) + " " + usd(v) + " · " + fmtDate(D.runs[r]) }));
-  }
-  const legend = el("div", { className: "legend" }, ...series.map((sr) => {
-    const st = stats(sr.pts);
-    return el("span", {}, el("i", { style: "background:" + sr.color }), (NAMES[sr.c] || sr.c) + ": now " + usd(st.now) + ", first " + usd(st.first) + ", low " + usd(st.low));
-  }));
-  return el("div", {}, legend, svg);
-}
-
-function sortKey(s, mode) {
-  const st = cabins.map((c) => s.cabins[c] && stats(s.cabins[c])).filter(Boolean);
-  if (mode === "price") return Math.min(...st.map((x) => x.now ?? Infinity));
-  if (mode === "drop") return Math.min(...st.map((x) => (x.now != null && x.first ? (x.now - x.first) / x.first : 0)));
-  return s.date;
-}
-
-function render() {
-  const mode = document.getElementById("sort").value;
-  const list = [...D.sailings].sort((a, b) => { const ka = sortKey(a, mode), kb = sortKey(b, mode); return ka < kb ? -1 : ka > kb ? 1 : a.date.localeCompare(b.date); });
-  const body = document.getElementById("body");
-  body.replaceChildren();
-  for (const s of list) {
-    const tr = el("tr", { className: "row" }, el("td", { textContent: s.date }), el("td", { textContent: s.nights }), el("td", { textContent: s.port }),
-      ...cabins.map((c) => cell(s.cabins[c])), el("td", { className: "name", textContent: s.name }),
-      el("td", {}, el("a", { href: s.url, target: "_blank", rel: "noopener", textContent: "book", onclick: (e) => e.stopPropagation() })));
-    tr.onclick = () => {
-      const next = tr.nextElementSibling;
-      if (next && next.classList.contains("chart")) { next.remove(); return; }
-      tr.after(el("tr", { className: "chart" }, el("td", { colSpan: 5 + cabins.length }, chart(s))));
+    const nT = Math.max(2, Math.min(6, Math.floor((W - L - R) / 110)));
+    for (let i = 0; i <= nT; i++) {
+      const v = x0 + ((x1 - x0) * i) / nT;
+      svg.append(svgEl("text", { x: X(v), y: H - 6, "text-anchor": i === 0 ? "start" : i === nT ? "end" : "middle" }, opts.xFmt(v)));
+    }
+    for (const s of opts.series) {
+      let d = "", pen = false, prevY;
+      const pts = opts.step && opts.extendTo != null && s.pts.length ? [...s.pts, [opts.extendTo, s.pts[s.pts.length - 1][1]]] : s.pts;
+      for (const [x, y] of pts) {
+        if (y == null) { pen = false; continue; }
+        if (!pen) d += `M${X(x)} ${Y(y)}`;
+        else d += opts.step ? `H${X(x)}V${Y(y)}` : `L${X(x)} ${Y(y)}`;
+        pen = true; prevY = y;
+      }
+      svg.append(svgEl("path", { d, fill: "none", stroke: s.color, "stroke-width": opts.step ? 2.2 : 1.4, "stroke-linejoin": "round", opacity: opts.step ? 1 : 0.55 }));
+      for (const [x, y] of s.pts) if (y != null) svg.append(svgEl("circle", { cx: X(x), cy: Y(y), r: opts.dot || 3, fill: s.color }));
+    }
+    const cross = svgEl("line", { y1: Tp, y2: H - B, stroke: "var(--faint)", "stroke-dasharray": "3 3", visibility: "hidden" });
+    svg.append(cross);
+    const ring = svgEl("g", {});
+    svg.append(ring);
+    const overlay = svgEl("rect", { x: L, y: 0, width: W - L - R, height: H - B, fill: "transparent", style: opts.onClick ? "cursor:pointer" : "" });
+    svg.append(overlay);
+    const tip = el("div", { class: "tip" });
+    box.append(svg, tip);
+    const nearest = (px) => {
+      const v = x0 + ((px - L) / (W - L - R)) * (x1 - x0);
+      let best = opts.xs[0], bd = Infinity;
+      for (const x of opts.xs) { const d = Math.abs(x - v); if (d < bd) { bd = d; best = x; } }
+      return best;
     };
-    body.append(tr);
-  }
+    const pos = (ev) => { const r = svg.getBoundingClientRect(); return ev.clientX - r.left; };
+    let cur = null;
+    overlay.onpointermove = (ev) => {
+      cur = nearest(pos(ev));
+      cross.setAttribute("x1", X(cur)); cross.setAttribute("x2", X(cur)); cross.setAttribute("visibility", "visible");
+      ring.replaceChildren();
+      for (const s of opts.series) {
+        const y = opts.valueAt(s, cur);
+        if (y != null) ring.append(svgEl("circle", { cx: X(cur), cy: Y(y), r: 5, fill: "var(--card)", stroke: s.color, "stroke-width": 2 }));
+      }
+      tip.replaceChildren(opts.tip(cur));
+      tip.style.display = "block";
+      const tw = tip.offsetWidth, left = X(cur) + 12 + tw > W ? X(cur) - 12 - tw : X(cur) + 12;
+      tip.style.left = Math.max(0, left) + "px"; tip.style.top = Tp + "px";
+    };
+    overlay.onpointerleave = () => { tip.style.display = "none"; cross.setAttribute("visibility", "hidden"); ring.replaceChildren(); };
+    if (opts.onClick) overlay.onclick = (ev) => opts.onClick(nearest(pos(ev)));
+  };
+  charts.push({ box, draw });
+  draw();
 }
-document.getElementById("sort").onchange = render;
-render();
+let resizeTimer;
+window.addEventListener("resize", () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => charts.forEach((c) => c.box.isConnected && c.draw()), 150);
+});
+
+function renderOverview() {
+  const list = filtered().slice().sort((a, b) => a.ms - b.ms);
+  const cabs = visibleCabins();
+  $("overview-legend").replaceChildren(...cabs.map((c) => el("span", {}, el("i", { style: `background:${color(c)}` }), NAMES[c] || c)));
+  const box = $("overview");
+  const byMs = new Map(); for (const s of list) { if (!byMs.has(s.ms)) byMs.set(s.ms, []); byMs.get(s.ms).push(s); }
+  charts.splice(0, charts.length, ...charts.filter((c) => c.box !== box));
+  lineChart(box, {
+    height: 260, dot: 3,
+    series: cabs.map((c) => ({ key: c, color: color(c), pts: list.filter((s) => s.cabins[c]).map((s) => [s.ms, s.st[c].now ?? null]) })),
+    xs: [...byMs.keys()],
+    xFmt: (v) => F.month.format(v),
+    valueAt: (s, x) => { const ss = byMs.get(x) || []; const vals = ss.map((q) => q.st[s.key]?.now).filter((v) => v != null); return vals.length ? Math.min(...vals) : null; },
+    tip: (x) => {
+      const ss = byMs.get(x) || [];
+      return el("div", {}, ss.map((s) => el("div", {},
+        el("b", { textContent: `${fmtSail(s.date)} · ${s.nights} nights${shipsInData.length > 1 ? " · " + s.ship : ""}` }),
+        cabs.filter((c) => s.cabins[c]).map((c) => {
+          const st = s.st[c]; const d = st.now != null && st.first != null ? st.now - st.first : 0;
+          return el("div", {}, el("i", { style: `background:${color(c)}` }), `${NAMES[c]}: ${usd(st.now)}`,
+            d ? el("span", { class: `delta ${d < 0 ? "down" : "up"}`, textContent: `${signed(d)} since first seen` }) : null);
+        }))));
+    },
+    onClick: (x) => { const ss = byMs.get(x); if (ss && ss.length) openDetail(ss[0].id); },
+  });
+}
+
+// ---------- table ----------
+function sortKey(s) {
+  const st = visibleCabins().map((c) => s.st[c]).filter(Boolean);
+  if (state.sort === "price") return Math.min(...st.map((x) => x.now ?? Infinity));
+  if (state.sort === "drop") return Math.min(0, ...st.map((x) => (x.now != null && x.first ? (x.now - x.first) / x.first : 0)));
+  return s.ms;
+}
+function renderTable() {
+  const cabs = visibleCabins();
+  $("thead").replaceChildren(el("tr", {},
+    el("th", { textContent: "Sail date" }), el("th", { textContent: "Nights" }), el("th", { textContent: "From" }),
+    shipsInData.length > 1 ? el("th", { textContent: "Ship" }) : null,
+    cabs.map((c) => el("th", {}, el("span", { style: `color:${color(c)}`, textContent: "● " }), `${NAMES[c] || c} (now · since first seen)`)),
+    el("th", { textContent: "Itinerary" }), el("th", {})));
+  const list = filtered().slice().sort((a, b) => (sortKey(a) - sortKey(b)) || (a.ms - b.ms));
+  $("count").textContent = `· ${list.length}`;
+  $("tbody").replaceChildren(...list.map((s) => el("tr", { onclick: () => openDetail(s.id) },
+    el("td", { textContent: fmtSail(s.date) }), el("td", { textContent: s.nights }), el("td", { textContent: s.port }),
+    shipsInData.length > 1 ? el("td", { textContent: s.ship }) : null,
+    cabs.map((c) => {
+      const st = s.st[c];
+      if (!st) return el("td", { class: "cab faint", textContent: "not offered" });
+      if (st.now == null) return el("td", { class: "cab faint", textContent: "sold out" });
+      const d = st.first != null ? st.now - st.first : 0;
+      return el("td", { class: "cab" }, el("span", { class: "pnow", textContent: usd(st.now) }),
+        d ? el("span", { class: `delta ${d < 0 ? "down" : "up"}`, textContent: signed(d) }) : null, spark(s.cabins[c]));
+    }),
+    el("td", { class: "itin", textContent: s.name }),
+    el("td", {}, el("a", { href: s.url, target: "_blank", rel: "noopener", textContent: "Book", onclick: (e) => e.stopPropagation() })))));
+}
+
+// ---------- detail ----------
+function openDetail(id) {
+  const s = D.sailings.find((x) => x.id === id);
+  if (!s) return;
+  const dlg = $("detail");
+  const cabs = ORDER.filter((c) => s.cabins[c]);
+  const chartBox = el("div", { class: "chart" });
+  const log = [];
+  for (const c of cabs) {
+    const ser = s.cabins[c];
+    for (let i = 1; i < ser.length; i++) log.push({ r: ser[i][0], c, from: ser[i - 1][1], to: ser[i][1] });
+  }
+  log.sort((a, b) => b.r - a.r);
+  dlg.replaceChildren(
+    el("div", { class: "dlg-head" },
+      el("div", {}, el("h2", { textContent: `${fmtSail(s.date)} · ${s.nights} nights from ${s.port}` }),
+        el("div", { class: "muted", style: "font-size:13px", textContent: `${s.ship} · ${s.name}` })),
+      el("div", { style: "display:flex;gap:8px" },
+        el("a", { href: s.url, target: "_blank", rel: "noopener" }, el("button", { class: "primary", textContent: "Book" })),
+        el("button", { textContent: "Close", onclick: () => dlg.close() }))),
+    el("div", { class: "dlg-body" },
+      el("div", { class: "stats" }, cabs.map((c) => {
+        const st = s.st[c]; const d = st.now != null && st.first != null ? st.now - st.first : 0;
+        return el("div", { class: "stat" },
+          el("h3", {}, el("i", { style: `background:${color(c)}` }), NAMES[c] || c),
+          el("div", { class: "big" }, st.now == null ? "sold out" : usd(st.now),
+            d ? el("span", { class: `delta ${d < 0 ? "down" : "up"}`, textContent: `${signed(d)} (${pctOf(d, st.first)})` }) : null),
+          el("dl", {},
+            el("dt", { textContent: "First seen" }), el("dd", { textContent: st.first == null ? "—" : `${usd(st.first)} · ${F.date.format(T[st.firstR])}` }),
+            el("dt", { textContent: "Lowest" }), el("dd", { textContent: st.low == null ? "—" : `${usd(st.low)} · ${F.date.format(T[st.lowR])}` }),
+            el("dt", { textContent: "Highest" }), el("dd", { textContent: st.high == null ? "—" : `${usd(st.high)} · ${F.date.format(T[st.highR])}` })));
+      })),
+      el("h3", { style: "font-size:14px;margin:4px 0 6px", textContent: "Price history" }),
+      chartBox,
+      el("h3", { style: "font-size:14px;margin:16px 0 6px", textContent: "Price changes" }),
+      log.length
+        ? el("table", { class: "log" }, el("thead", {}, el("tr", {}, el("th", { textContent: "When" }), el("th", { textContent: "Cabin" }), el("th", { textContent: "Price" }), el("th", { textContent: "Change" }))),
+            el("tbody", {}, log.map((x) => {
+              const d = x.from != null && x.to != null ? x.to - x.from : null;
+              return el("tr", {}, el("td", { textContent: fmtTime(T[x.r]) }), el("td", { textContent: NAMES[x.c] || x.c }),
+                el("td", {}, el("s", { class: "faint", textContent: x.from == null ? "sold out" : usd(x.from) }), " → ", el("b", { textContent: x.to == null ? "sold out" : usd(x.to) })),
+                el("td", { class: d == null ? "" : d < 0 ? "down" : "up", textContent: d == null ? "" : `${signed(d)} (${pctOf(d, x.from)})` }));
+            })))
+        : el("p", { class: "empty", textContent: `No price changes since ${T.length ? F.date.format(T[0]) : "tracking began"}.` })));
+  dlg.onclose = () => { if (location.hash) history.replaceState(null, "", location.pathname + location.search); };
+  if (!dlg.open) dlg.showModal();
+  history.replaceState(null, "", "#s=" + encodeURIComponent(id));
+  const runXs = T.slice();
+  charts.splice(0, charts.length, ...charts.filter((c) => c.box.isConnected));
+  lineChart(chartBox, {
+    height: 240, step: true, dot: 3, extendTo: T[LAST], xMin: T[0], xMax: T[LAST],
+    series: cabs.map((c) => ({ key: c, color: color(c), pts: s.cabins[c].map(([r, p]) => [T[r], p]) })),
+    xs: runXs,
+    xFmt: (v) => F.date.format(v),
+    valueAt: (ser, x) => { const r = T.indexOf(x); return priceAt(s.cabins[ser.key], r) ?? null; },
+    tip: (x) => {
+      const r = T.indexOf(x);
+      return el("div", {}, el("b", { textContent: fmtTime(x) }),
+        cabs.map((c) => el("div", {}, el("i", { style: `background:${color(c)}` }), `${NAMES[c]}: ${usd(priceAt(s.cabins[c], r))}`)));
+    },
+  });
+}
+
+// ---------- tracking editor ----------
+function openEditor() {
+  const dlg = $("editor");
+  const rows = D.watchlist.ships.map((w) => ({ code: w.code, from: w.from || "", to: w.to || "", minNights: w.minNights || "", cabins: new Set(w.cabins || []) }));
+  const thr = { minDropPct: D.watchlist.alerts?.minDropPct ?? 5, minDropUsd: D.watchlist.alerts?.minDropUsd ?? 50 };
+  const list = el("div", {}), pre = el("pre", {}), err = el("p", { class: "err" });
+  const build = () => {
+    const ships = rows.map((r) => {
+      const o = { code: r.code, name: FLEET.get(r.code) || r.code };
+      if (r.from) o.from = r.from;
+      if (r.to) o.to = r.to;
+      if (r.minNights) o.minNights = +r.minNights;
+      if (r.cabins.size) o.cabins = ORDER.filter((c) => r.cabins.has(c));
+      return o;
+    });
+    return { alerts: { minDropPct: +thr.minDropPct, minDropUsd: +thr.minDropUsd }, ships };
+  };
+  const problems = () => {
+    const p = [];
+    if (!rows.length) p.push("Add at least one ship.");
+    const codes = rows.map((r) => r.code);
+    if (new Set(codes).size !== codes.length) p.push("Each ship can appear only once.");
+    for (const r of rows) if (r.from && r.to && r.from > r.to) p.push(`${FLEET.get(r.code)}: the start date is after the end date.`);
+    if (!(+thr.minDropPct >= 0) || !(+thr.minDropUsd >= 0)) p.push("Thresholds must be zero or more.");
+    return p;
+  };
+  const refresh = () => {
+    const json = JSON.stringify(build(), null, 2) + "\n";
+    pre.textContent = json;
+    err.textContent = problems().join(" ");
+    return json;
+  };
+  const renderRows = () => {
+    list.replaceChildren(...rows.map((r, i) => {
+      const input = (key, type, extra = {}) => el("input", Object.assign({ type, value: r[key], oninput: (e) => { r[key] = e.target.value; refresh(); } }, extra));
+      return el("div", { class: "editor-row" },
+        el("label", {}, "Ship", el("select", { onchange: (e) => { r.code = e.target.value; refresh(); } },
+          D.fleet.map((f) => el("option", { value: f.code, textContent: f.name, selected: f.code === r.code })))),
+        el("label", {}, "Sailing from (optional)", input("from", "date")),
+        el("label", {}, "Sailing to (optional)", input("to", "date")),
+        el("label", {}, "Min nights", input("minNights", "number", { min: 1, max: 30, placeholder: "any" })),
+        el("button", { textContent: "Remove", onclick: () => { rows.splice(i, 1); renderRows(); } }),
+        el("div", { class: "cabins" }, "Cabins:", ORDER.map((c) => {
+          const lab = el("label", { class: "cabin-toggle" + (r.cabins.has(c) ? " on" : "") },
+            el("input", { type: "checkbox", checked: r.cabins.has(c), onchange: () => {
+              r.cabins.has(c) ? r.cabins.delete(c) : r.cabins.add(c); lab.classList.toggle("on"); refresh(); } }),
+            el("i", { style: `background:${color(c)}` }), NAMES[c]);
+          return lab;
+        }), el("span", { class: "faint", textContent: "(none ticked = all cabins)" })));
+    }));
+    refresh();
+  };
+  const thrInput = (key, label) => el("label", {}, label, el("input", { type: "number", min: 0, value: thr[key], style: "width:110px", oninput: (e) => { thr[key] = e.target.value; refresh(); } }));
+  const saveBtn = el("button", { class: "primary", textContent: "Copy and open GitHub to save", onclick: async () => {
+    if (problems().length) return;
+    const json = refresh();
+    let copied = false;
+    try { await navigator.clipboard.writeText(json); copied = true; } catch {}
+    saveBtn.textContent = copied ? "Copied — paste it in GitHub" : "Copy the text below, then paste it in GitHub";
+    window.open(D.editUrl, "_blank", "noopener");
+  } });
+  dlg.replaceChildren(
+    el("div", { class: "dlg-head" }, el("h2", { textContent: "Change what's tracked" }), el("button", { textContent: "Close", onclick: () => dlg.close() })),
+    el("div", { class: "dlg-body" },
+      el("p", { class: "muted", style: "margin:0;font-size:13px", textContent: "Pick ships, sail dates, trip length and cabin types. Prices are checked for every sailing that matches." }),
+      list,
+      el("button", { style: "margin-top:10px", textContent: "+ Add a ship", onclick: () => {
+        const used = new Set(rows.map((r) => r.code));
+        rows.push({ code: (D.fleet.find((f) => !used.has(f.code)) || D.fleet[0]).code, from: "", to: "", minNights: "", cabins: new Set() });
+        renderRows(); } }),
+      el("h3", { style: "font-size:14px;margin:18px 0 0", textContent: "Email me when a price drops at least" }),
+      el("div", { class: "thr" }, thrInput("minDropPct", "Percent (%)"), thrInput("minDropUsd", "and dollars per person ($)")),
+      err,
+      el("ol", { class: "steps" },
+        el("li", { textContent: "Click the button: the new watchlist is copied and GitHub's editor for it opens (you need to be signed in as the repo owner)." }),
+        el("li", { textContent: "In GitHub, select all the text, paste, and click “Commit changes”." }),
+        el("li", { textContent: "The next price check (8 AM or 8 PM New York time) uses it. New ships appear here after that check." })),
+      saveBtn,
+      el("details", { style: "margin-top:12px" }, el("summary", { class: "muted", style: "font-size:13px;cursor:pointer", textContent: "Show the watchlist text" }), pre)));
+  renderRows();
+  dlg.showModal();
+}
+$("edit-btn").onclick = openEditor;
+
+// ---------- boot ----------
+$("sort").value = state.sort;
+$("sort").onchange = (e) => { state.sort = e.target.value; store.set("sort", state.sort); renderTable(); };
+function renderAll() { renderChanges(); renderOverview(); renderTable(); }
+renderHeader();
+renderFilters();
+renderAll();
+const m = location.hash.match(/^#s=(.+)$/);
+if (m) openDetail(decodeURIComponent(m[1]));
 </script>
 </body>
 </html>
